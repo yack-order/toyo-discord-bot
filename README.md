@@ -16,6 +16,69 @@ To create a Discord bot command to query a Google Spreadsheet, you'll need to us
     npm install discord.js googleapis
     ```
 
+# Installation
+To configure Discord to pull the latest code for a bot from GitHub, you can set up a deployment pipeline or use GitHub Actions to automate the process. Here's a step-by-step guide.
+1. Set Up a GitHub Repository
+    * Ensure your bot's code is hosted in a GitHub repository.
+    * Commit and push all your bot's files to the repository.
+2. Host Your Bot
+    * Choose a hosting platform for your bot, such as:
+        * VPS/Server: Use a service like AWS, DigitalOcean, or Linode.
+        * Cloud Platforms: Use Heroku, Render, or Replit.
+        * Local Machine: If you're running the bot locally, ensure it's always online using tools like PM2 or a task scheduler.
+3. Set Up GitHub Webhooks
+    * Webhooks allow GitHub to notify your hosting environment whenever new code is pushed.
+        1. Go to your GitHub repository.
+        2. Navigate to Settings > Webhooks > Add Webhook.
+        3. Enter the Payload URL of your hosting environment (e.g., a script or endpoint that pulls the latest code).
+        4. Set the Content Type to application/json.
+        5. Choose the events you want to trigger the webhook (e.g., push events).
+        6. Save the webhook.
+4. Write a Pull Script
+    * Create a script on your hosting environment to pull the latest code from GitHub. For example:
+    ```bash
+    #!/bin/bash
+    cd /path/to/your/bot
+    git pull origin main
+    npm install # Install dependencies if needed
+    pm2 restart bot # Restart the bot (if using PM2)
+    ```
+    * Ensure this script is triggered by the webhook.
+5. Use GitHub Actions (Optional)
+* GitHub Actions can automate deployment when code is pushed to the repository.
+    1.  Create a .github/workflows/deploy.yml file in your repository.
+    2. Add the following example workflow:
+    ```yaml
+    name: Deploy Bot
+
+    on:
+    push:
+        branches:
+        - main
+
+    jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+        - name: Checkout code
+        uses: actions/checkout@v2
+
+        - name: Deploy to server
+        run: |
+            ssh user@your-server "cd /path/to/your/bot && git pull origin main && npm install && pm2 restart bot"
+    ```
+* Replace user@your-server and /path/to/your/bot with your server's details.
+
+6. Test the Setup
+* Push a change to your GitHub repository.
+* Verify that the bot pulls the latest code and restarts automatically.
+
+7. Configuration Notes:
+* Security: Use SSH keys for secure access to your server.
+* Error Handling: Add logging to your scripts to debug any issues.
+* Always Online: Use a process manager like PM2 to keep your bot running.
+
 # Notes
 1. Rate Limits:
     * Ensure your bot handles API rate limits gracefully to avoid being throttled by either Discord or Google.
