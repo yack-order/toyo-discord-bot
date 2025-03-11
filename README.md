@@ -90,6 +90,7 @@ To configure Discord to pull the latest code for a bot from GitHub, you can set 
     * Ensure the Service Account used for the Google Sheets API has "Editor" permissions for the spreadsheet.
     * Ensure the Service Account used for the Google Sheets API has "Editor" permissions for the `links_from_discord` spreadsheet.
     * Ensure the Service Account has "Reader" access to the `Card_DB` spreadsheet.
+    * Ensure the Google Sheets API service account has "Editor" access to the `points_fetch_log` spreadsheet.
 5. Spreadsheet ID:
     * Replace the placeholder YOUR_DISCORD_USERS_SPREADSHEET_ID with the actual ID of your Google Sheet.
 6. Customization:
@@ -128,7 +129,17 @@ To configure Discord to pull the latest code for a bot from GitHub, you can set 
     * Ensures only one match is returned for ID-based searches.
     * Handles cases where no matches are found.
     * Returns data in the format of `header: data` for columns A, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, and R.
-
+5. Command: `fetch-points`
+    * When the user types `fetch-points`, the bot retrieves the message author's Discord ID and username.
+    * Uses the Google Sheets API to search the spreadsheet for the Discord ID in column `A`.
+    * Retrieves the points from column `K` (10th index in the array).
+    * Formats the Mee6 command `/give-item member:discordID item:Yak Point amount:X` using the retrieved points.
+    * Logs the execution (add logic to send the command to the bot in Discord if necessary).
+    * Appends a log entry to the points_fetch_log spreadsheet, recording the username, Discord ID, and points awarded.
+    * Handles cases where the Discord ID doesn't exist or points are invalid (not a number).
+    * Spreadsheet Structures: Points Spreadsheet, Points Fetch Log
+    * The Mee6 command must be executed in a Discord channel where Mee6 is active. You can use the Discord API to send the command to the appropriate channel programmatically.
+    * Includes error handling for invalid Discord IDs, invalid points values, and connectivity issues with the Google Sheets API.
 
 # Example Spreadsheet Structure
 

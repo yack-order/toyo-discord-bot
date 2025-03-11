@@ -9,6 +9,8 @@ const DISCORD_TOKEN = 'YOUR_DISCORD_BOT_TOKEN'; // Replace with your bot token
 // Load Google Sheets credentials
 const GOOGLE_SHEETS_CREDENTIALS = './credentials.json'; // Path to the JSON key file
 const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID'; // Replace with your Google Spreadsheet ID
+const POINTS_SPREADSHEET_ID = 'YOUR_POINTS_SPREADSHEET_ID'; // Replace with the spreadsheet containing points (e.g., "Card_DB")
+const LOG_SPREADSHEET_ID = 'YOUR_POINTS_LOG_SPREADSHEET_ID'; // Replace with the points_fetch_log Spreadsheet ID
 
 // Initialize the Discord client
 const client = new Client({
@@ -162,6 +164,60 @@ async function checkCard(searchTerm) {
     }
 }
 
+// Function to fetch points for a Discord ID
+async function fetchPoints(discordId, username) {
+    try {
+        // Fetch data from the points spreadsheet
+        const range = 'Sheet1!A:K'; // Assuming Discord ID is in column A and points are in column K
+        const response = await sheets.spreadsheets.values.get({
+            spreadsheetId: POINTS_SPREADSHEET_ID,
+            range: range,
+        });
+
+        const rows = response.data.values;
+
+        if (!rows || rows.length === 0) {
+            return 'No data found in the points spreadsheet.';
+        }
+
+        // Find the row with the matching Discord ID
+        const matchingRow = rows.find(row => row[0] === discordId); // Column A is index 0
+        if (!matchingRow) {
+            return `No points found for Discord ID: ${discordId}`;
+        }
+
+        const points = matchingRow[10]; // Column K is index 10
+        if (!points || isNaN(points)) {
+            return `Invalid points value for Discord ID: ${discordId}`;
+        }
+
+        // Trigger the mee6 command
+        const mee6Command = `/give-item member:${discordId} item:Yak Point amount:${points}`;
+        console.log(`Executing Mee6 Command: ${mee6Command}`); // Replace with actual Mee6 command logic
+        // Note: Add logic to send the mee6 command to the correct channel in Discord if necessary
+
+        // Log the action in the points_fetch_log spreadsheet
+        const logRange = 'Sheet1!A:C'; // Assuming columns A, B, and C are for Username, Discord ID, and Points
+        const logValues = [[username, discordId, points]]; // Log the action
+
+        const logRequest = {
+            spreadsheetId: LOG_SPREADSHEET_ID,
+            range: logRange,
+            valueInputOption: 'USER_ENTERED',
+            insertDataOption: 'INSERT_ROWS',
+            resource: {
+                values: logValues,
+            },
+        };
+        await sheets.spreadsheets.values.append(logRequest);
+
+        return `Successfully fetched points for ${username}. They were awarded ${points} Yak Points!`;
+    } catch (error) {
+        console.error('Error fetching points:', error);
+        return 'There was an error fetching points.';
+    }
+}
+
 // Handle messages
 client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
@@ -214,6 +270,16 @@ client.on('messageCreate', async (message) => {
 
         // Query the spreadsheet for the search term
         const result = await checkCard(searchTerm);
+        message.reply(result);
+    }
+
+     // Command: fetch-points
+     if (message.content.startsWith('fetch-points')) {
+        const discordId = message.author.id; // Use the message author's Discord ID
+        const username = message.author.username; // Get the username
+
+        // Fetch points for the user
+        const result = await fetchPoints(discordId, username);
         message.reply(result);
     }
 });
