@@ -167,3 +167,15 @@ To configure Discord to pull the latest code for a bot from GitHub, you can set 
 | --- | --- | --- | --- | --- |
 | ABC12 | https://link | MyCardTitle | Data1 | ... | Data2 |
 | DEF34 | https://link2 | AnotherTitle | Data3 | ...  | DataM |
+
+## points_db
+| Column A (Discord ID) | Column B (Points Available) |
+| --- | --- |
+| 123456789012 | 10 |
+| 987654321098 | 0 |
+
+## points_log
+| Column A (Discord ID) | Column B (Points Given) | Column C (Action Date) |
+| --- | --- | --- | 
+| 123456789012 | 5 | Mar 10 2025 | 
+| 987654321098 | 23 | Jan 1 2025 |
