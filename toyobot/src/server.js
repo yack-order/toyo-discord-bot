@@ -8,7 +8,7 @@ import {
   InteractionType,
   verifyKey,
 } from 'discord-interactions';
-import { AWW_COMMAND } from './commands.js';
+import { AWW_COMMAND, INVITE_COMMAND, GET_STORE_PAGE_COMMAND } from './commands.js';
 import { getCuteUrl } from './reddit.js';
 import { InteractionResponseFlags } from 'discord-interactions';
 
@@ -30,7 +30,7 @@ const router = AutoRouter();
  * A simple :wave: hello page to verify the worker is working.
  */
 router.get('/', (request, env) => {
-  return new Response(`👋 ${env.DISCORD_APPLICATION_ID}`);
+  return new Response(`Hello World! This is a Discord bot meant for The Optimistic Yack Order. \n👋 ${env.DISCORD_APPLICATION_ID}`);
 });
 
 /**
@@ -76,6 +76,18 @@ router.post('/', async (request, env) => {
             content: INVITE_URL,
             flags: InteractionResponseFlags.EPHEMERAL,
           },
+        });
+      }
+      case GET_STORE_PAGE_COMMAND.name.toLowerCase(): {
+        // Build the response. Best to use other function calls here so this is a short bit of code.
+        var rawmessage = "Sorry, this function is not implemented yet.";
+
+        // Send the message out to Discord.
+        return new JsonResponse({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: rawmessage,
+        },
         });
       }
       default:

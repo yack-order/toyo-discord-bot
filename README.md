@@ -11,7 +11,48 @@ Bot for the TOYO Discord with customized commands.
     * use the webui at cloudflare to create Secrets
     * To Use: hen import them into the code using `const token = process.env.NAME_OF_VARIABLE;` within the javascript file.
 * TODO: figure out how to do the wrangler deploy from github actions
-* [This Guide](https://github.com/discord/cloudflare-sample-app) was the most useful.
+* [cloudflare guide](https://developers.cloudflare.com/workers/get-started/quickstarts/) to create the worker, then follow [This Guide](https://github.com/discord/cloudflare-sample-app) to set up a sample app. For the most part I just copied content out of the sample app into the new worker i created. Its janky, but it worked. shut up.
+
+# Building New Commands
+NOTE THIS DOES NOT WORK!!!! no idea why. but when working on it i came across this: https://v13.discordjs.guide/creating-your-bot/command-handling.html
+1. `src/commands.js` - Add a new command using the template. It needs a name for the **const** to use, the **name** value is what a user enters in the chat `/yoto-store-info parameters go here`, **description** is what pops up when the user is typing
+    ```javascript
+        export const GET_STORE_PAGE_COMMAND = {
+        name: 'yoto-store-info',
+        description: 'Get information about a listing from the Yoto store.',
+        };
+    ```
+2. `register.js` - **Line 1** Update the import line to include the new command constant:
+    ```javascript
+    import { AWW_COMMAND, GET_STORE_PAGE_COMMAND } from './commands.js';
+    ```
+3. `register.js` - **Line 37** Add the new command constant into the PUT command body string. 
+    ```javascript
+    body: JSON.stringify([AWW_COMMAND, GET_STORE_PAGE_COMMAND]),
+    ```
+4. `server.js` - **Line 11** Update the import line to include the new command constant:
+    ```javascript
+    import { AWW_COMMAND, GET_STORE_PAGE_COMMAND } from './commands.js';
+    ```
+5. `server.js` - Add a new command processor for the `router.post` function:
+    ```javascript
+        case GET_STORE_PAGE_COMMAND.name.toLowerCase(): {
+            // Build the response. Best to use other function calls here so this is a short bit of code.
+            var rawmessage = "Sorry, this function is not implemented yet.";
+
+            // Send the message out to Discord.
+            return new JsonResponse({
+            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            data: {
+                content: rawmessage,
+            },
+            });
+        }
+    ```
+6. `server.js` - Write the code to process the actions
+7. On the command line (in the working folder) run `npm run register` to register the commands with Discord
+8. Publish the code to GitHub
+9. Test using ngrok `npm run ngrok` or deploy directly to cloudflare (see above) `npm run publish`
 
 ---
 
