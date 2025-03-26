@@ -1,83 +1,21 @@
 # toyo-discord-bot
- Bot for the TOYO Discord with customized commands.
+Bot for the TOYO Discord with customized commands.
 
-# Prerequisites
-To create a Discord bot command to query a Google Spreadsheet, you'll need to use the Discord API along with the Google Sheets API. Below is an example of how you can implement the command using Node.js, with the discord.js library and the googleapis library:
-1. Google Cloud Setup:
-    * Go to the Google Cloud Console.
-    * Create a new project and enable the Google Sheets API.
-    * Create a Service Account, download the JSON key file, and share the spreadsheet with the service account's email.
-2. Discord Bot Setup:
-    * Create a bot in the Discord Developer Portal.
-    * Invite the bot to your server with the appropriate permissions.
-3. Install Required Libraries:
-    * Use npm to install the libraries:
-    ```bash
-    npm install discord.js googleapis
-    ```
+# Development Notes
+* Write the code in the `/src` folder. Helper functions can be included as their own `.js` files but will then need to be marked with `export` and then `import <name> from './file.js'` wherever they are going to be used. 
+* `server.js` is the main bundle of code that is used by the server. This is what is hosted in cloudflare.
+* **DEV** Use `npm ngrok` to host the code locally. If doing this, the [Discord Application](https://discord.com/developers/applications/1354448393304408195/information) will need to be updated for where it points. Get the ngrok url and paste it in the `Interactions Endpoint URL` field.
+* **PROD** Use `npm run deploy` to push the updated code to Wrangler/cloudflare
+* **SECRETS** Secrets/constants can be pushed into cloudflare 
+    * push directly from the dev command line like this `npx wrangler secret put NAME_OF_VARIABLE`, or
+    * use the webui at cloudflare to create Secrets
+    * To Use: hen import them into the code using `const token = process.env.NAME_OF_VARIABLE;` within the javascript file.
+* TODO: figure out how to do the wrangler deploy from github actions
+* [This Guide](https://github.com/discord/cloudflare-sample-app) was the most useful.
 
-# Installation
-To configure Discord to pull the latest code for a bot from GitHub, you can set up a deployment pipeline or use GitHub Actions to automate the process. Here's a step-by-step guide.
-1. Set Up a GitHub Repository
-    * Ensure your bot's code is hosted in a GitHub repository.
-    * Commit and push all your bot's files to the repository.
-2. Host Your Bot
-    * Choose a hosting platform for your bot, such as:
-        * VPS/Server: Use a service like AWS, DigitalOcean, or Linode.
-        * Cloud Platforms: Use Heroku, Render, or Replit.
-        * Local Machine: If you're running the bot locally, ensure it's always online using tools like PM2 or a task scheduler.
-3. Set Up GitHub Webhooks
-    * Webhooks allow GitHub to notify your hosting environment whenever new code is pushed.
-        1. Go to your GitHub repository.
-        2. Navigate to Settings > Webhooks > Add Webhook.
-        3. Enter the Payload URL of your hosting environment (e.g., a script or endpoint that pulls the latest code).
-        4. Set the Content Type to application/json.
-        5. Choose the events you want to trigger the webhook (e.g., push events).
-        6. Save the webhook.
-4. Write a Pull Script
-    * Create a script on your hosting environment to pull the latest code from GitHub. For example:
-    ```bash
-    #!/bin/bash
-    cd /path/to/your/bot
-    git pull origin main
-    npm install # Install dependencies if needed
-    pm2 restart bot # Restart the bot (if using PM2)
-    ```
-    * Ensure this script is triggered by the webhook.
-5. Use GitHub Actions (Optional)
-* GitHub Actions can automate deployment when code is pushed to the repository.
-    1.  Create a .github/workflows/deploy.yml file in your repository.
-    2. Add the following example workflow:
-    ```yaml
-    name: Deploy Bot
+---
 
-    on:
-    push:
-        branches:
-        - main
-
-    jobs:
-    deploy:
-        runs-on: ubuntu-latest
-
-        steps:
-        - name: Checkout code
-        uses: actions/checkout@v2
-
-        - name: Deploy to server
-        run: |
-            ssh user@your-server "cd /path/to/your/bot && git pull origin main && npm install && pm2 restart bot"
-    ```
-* Replace user@your-server and /path/to/your/bot with your server's details.
-
-6. Test the Setup
-* Push a change to your GitHub repository.
-* Verify that the bot pulls the latest code and restarts automatically.
-
-7. Configuration Notes:
-* Security: Use SSH keys for secure access to your server.
-* Error Handling: Add logging to your scripts to debug any issues.
-* Always Online: Use a process manager like PM2 to keep your bot running.
+---
 
 # Notes
 1. Rate Limits:
