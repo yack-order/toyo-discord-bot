@@ -1,58 +1,123 @@
 # toyo-discord-bot
 Bot for the TOYO Discord with customized commands.
 
+# TOYO Bot Slash Commands
+The toyobot, as all bots in the TOYO discord are, is limited to the `#robot-mayhem` channel. 
+
+## /yoto-playlist <url> <show>
+
+### Description: 
+Get info about a playlist (private to you).
+
+### Parameters:
+* url (requried): yoto.io url to fetch data from
+* show: true/false; defaults to false; if true, the response will be displayed to all users. 
+
+### Notes: 
+* By default, the response will only be visible to the user to sent the command. Use `show: true` to overide this and publish the response to the whole channel. 
+* All command executions that are visible to the whole channel will expose the full command, including the parameters. yoto.io URLs that are for physical cards or non-shared MYO playlists should **NOT** be shared publicly, ever. 
+
+### Examples:
+`/yoto-playlist url: https://yoto.io/2u1gx?g4K9YqFNigES=5qiiuZqxtx7hu`
+![image](/images/yoto-playlist_url.webp)
+
+`/yoto-playlist url: https://yoto.io/2u1gx?g4K9YqFNigES=5qiiuZqxtx7hu show: true`
+![image](/images/yoto-playlist_url_show.webp)
+
+## /yoto-store <url>
+
+### Description: 
+Get info from the **yoto store** 
+
+### Parameters:
+* url (required): yotoplay.com url for the card or card pack listing.
+
+### Notes:
+* This will also sometimes work for wayback urls from the Internet Archive.
+* Geographicly limited store pages may be restircted and unable to parse properly. This is untested.
+
+### Examples: 
+`/yoto-store url:https://us.yotoplay.com/products/frog-and-toad-audio-collection`
+![image](/images/yoto-store_url.webp)
+
+
+
 # Development Notes
-* Write the code in the `/src` folder. Helper functions can be included as their own `.js` files but will then need to be marked with `export` and then `import <name> from './file.js'` wherever they are going to be used. 
+* Write the code in the `/src` folder. Helper functions can be included as their own `.js` files but will then need to be marked with `export` and then `import { name } from './file.js'` wherever they are going to be used. 
 * `server.js` is the main bundle of code that is used by the server. This is what is hosted in cloudflare.
-* **DEV** Use `npm ngrok` to host the code locally. If doing this, the [Discord Application](https://discord.com/developers/applications/1354448393304408195/information) will need to be updated for where it points. Get the ngrok url and paste it in the `Interactions Endpoint URL` field.
+* **DEV** Use `npm ngrok` to host the code locally. 
+    * If doing this, the [Discord Application](https://discord.com/developers/applications/1354448393304408195/information) will need to be updated for where it points. Get the ngrok url and paste it in the `Interactions Endpoint URL` field.
+    * Note: I probably need to create a dev-bot on discord and a dev discord so this can be tested outside production. the issue is that things perform differently in dev versus prod because prod is run from cloudflare workers directly.
 * **PROD** Use `npm run deploy` to push the updated code to Wrangler/cloudflare
 * **SECRETS** Secrets/constants can be pushed into cloudflare 
     * push directly from the dev command line like this `npx wrangler secret put NAME_OF_VARIABLE`, or
     * use the webui at cloudflare to create Secrets
-    * To Use: hen import them into the code using `const token = process.env.NAME_OF_VARIABLE;` within the javascript file.
-* TODO: figure out how to do the wrangler deploy from github actions
+    * To Use: then import them into the code using `const token = process.env.NAME_OF_VARIABLE;` within the javascript file.
+* ~~TODO: figure out how to do the wrangler deploy from github actions~~
+* This comes from [the guide here](https://v13.discordjs.guide/creating-your-bot/command-handling.html).
 * [cloudflare guide](https://developers.cloudflare.com/workers/get-started/quickstarts/) to create the worker, then follow [This Guide](https://github.com/discord/cloudflare-sample-app) to set up a sample app. For the most part I just copied content out of the sample app into the new worker i created. Its janky, but it worked. shut up.
 
+# Discord Doc links
+Pins to relevant documentation that i've been using.
+* [Message Type Flags](https://discord.com/developers/docs/resources/message#message-object-message-flags)
+* [Application commands](https://discord.com/developers/docs/interactions/application-commands)
+* [Slash Commands & Sample Interaction JSON](https://discord.com/developers/docs/interactions/application-commands#subcommands-and-subcommand-groups)
+* [Registering Commands](https://discord.com/developers/docs/tutorials/upgrading-to-application-commands#registering-commands)
+
+
 # Building New Commands
-NOTE THIS DOES NOT WORK!!!! no idea why. but when working on it i came across this: https://v13.discordjs.guide/creating-your-bot/command-handling.html
-1. `src/commands.js` - Add a new command using the template. It needs a name for the **const** to use, the **name** value is what a user enters in the chat `/yoto-store-info parameters go here`, **description** is what pops up when the user is typing
+1. `src/commands.js` - Add a new command using the template. It needs a name for the **const** to use, the **name** value is what a user enters in the chat `/yoto-store-info parameters go here`, **description** is what pops up when the user is typing. Options can be used. 
     ```javascript
         export const GET_STORE_PAGE_COMMAND = {
         name: 'yoto-store-info',
         description: 'Get information about a listing from the Yoto store.',
         };
     ```
-2. `register.js` - **Line 1** Update the import line to include the new command constant:
+2. `register.js` - **Line 1** Update the import line to include the new command **constant**:
     ```javascript
-    import { AWW_COMMAND, GET_STORE_PAGE_COMMAND } from './commands.js';
+            import { AWW_COMMAND, GET_STORE_PAGE_COMMAND } from './commands.js';
     ```
-3. `register.js` - **Line 37** Add the new command constant into the PUT command body string. 
+3. `register.js` - **Line 37** Add the new command **constant** into the PUT command body string. 
     ```javascript
-    body: JSON.stringify([AWW_COMMAND, GET_STORE_PAGE_COMMAND]),
+        body: JSON.stringify([AWW_COMMAND, GET_STORE_PAGE_COMMAND]),
     ```
-4. `server.js` - **Line 11** Update the import line to include the new command constant:
+4. `server.js` - **Line 11** Add a new import line to include the new command **constant** and command **function**:
     ```javascript
-    import { AWW_COMMAND, GET_STORE_PAGE_COMMAND } from './commands.js';
+        import { GET_STORE_PAGE_COMMAND, GET_STORE_PAGE_EXEC } from './commands.js';
     ```
 5. `server.js` - Add a new command processor for the `router.post` function:
     ```javascript
-        case GET_STORE_PAGE_COMMAND.name.toLowerCase(): {
-            // Build the response. Best to use other function calls here so this is a short bit of code.
-            var rawmessage = "Sorry, this function is not implemented yet.";
-
-            // Send the message out to Discord.
-            return new JsonResponse({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-                content: rawmessage,
-            },
-            });
+        case GET_STORE_PAGE_COMMAND.name.toLowerCase():{
+            return GET_STORE_PAGE_EXEC(request, env, interaction);
         }
     ```
-6. `server.js` - Write the code to process the actions
-7. On the command line (in the working folder) run `npm run register` to register the commands with Discord
-8. Publish the code to GitHub
-9. Test using ngrok `npm run ngrok` or deploy directly to cloudflare (see above) `npm run publish`
+6. `server.js` - Add a new `router.get` function call:
+    ```javascript
+        router.get('/yoto-store-page', (request, env) => {
+            return YOTO_STORE_PAGE_EXEC(request, env, "webget");
+        });
+    ```
+7. `command.js` (or some other helper file) - Write the code to process the actions inside the `YOTO_STORE_PAGE_EXEC` function created.
+    ```javascript
+        export function YOTO_STORE_PAGE_EXEC(request, env, interaction) {  
+        return new JsonResponse({
+            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            data: {
+                content: "Pong!",
+            }
+        })
+        };
+    ```
+8. On the command line (in the working folder) run `npm run register` to register the commands with Discord
+9. If possible to test, Test using ngrok `npm run ngrok`
+10. Deploy directly to cloudflare (see above) `npm run publish`
+11. Publish the code to GitHub
+
+---
+
+---
+# This junk below came from some copilot ideation and has not been implemented yet. 
+The code it generated lives in a file called `copilot_draft_toyobot.js`. As any of it becomes usable it will be converted into commands and pushed into the `./toyobot/src` folder structure.
 
 ---
 
