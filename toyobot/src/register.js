@@ -1,4 +1,7 @@
-import { AWW_COMMAND, INVITE_COMMAND, GET_STORE_PAGE_COMMAND } from './commands.js';
+import { AWWWW_COMMAND, INVITE_COMMAND, PING_COMMAND, SERVER_COMMAND, USER_COMMAND, 
+  YOTO_STORE_COMMAND, YOTO_PLAYLIST_COMMAND,
+  EXTRACT_AUDIO_COMMAND,
+ } from './commands.js';
 import dotenv from 'dotenv';
 import process from 'node:process';
 
@@ -26,31 +29,45 @@ if (!applicationId) {
  * Register all commands globally.  This can take o(minutes), so wait until
  * you're sure these are the commands you want.
  */
-const url = `https://discord.com/api/v10/applications/${applicationId}/commands`;
+const url = `https://discord.com/api/applications/${applicationId}/commands`;
 
-const response = await fetch(url, {
-  headers: {
-    'Content-Type': 'application/json',
-    Authorization: `Bot ${token}`,
-  },
-  method: 'PUT',
-  body: JSON.stringify([AWW_COMMAND, INVITE_COMMAND, GET_STORE_PAGE_COMMAND]),
-});
+const reg_command = JSON.stringify([PING_COMMAND, 
+  YOTO_STORE_COMMAND, YOTO_PLAYLIST_COMMAND,
+  EXTRACT_AUDIO_COMMAND,
+]);
+const del_command = JSON.stringify([]);
 
-if (response.ok) {
-  console.log('Registered all commands');
-  const data = await response.json();
-  console.log(JSON.stringify(data, null, 2));
-} else {
-  console.error('Error registering commands');
-  let errorText = `Error registering commands \n ${response.url}: ${response.status} ${response.statusText}`;
-  try {
-    const error = await response.text();
-    if (error) {
-      errorText = `${errorText} \n\n ${error}`;
+async function send(command, note){
+  console.log(`${note} all existing commands...`);
+
+  const response = await fetch(url, {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bot ${token}`,
+    },
+    method: 'PUT',
+    body: command,
+  });
+
+  if (response.ok) {
+    console.log(`${note} all commands`);
+    const data = await response.json();
+    console.log(JSON.stringify(data, null, 2));
+  } else {
+    console.error(`Error with ${note} commands`);
+    let errorText = `Error ${note} commands \n ${response.url}: ${response.status} ${response.statusText}`;
+    try {
+      const error = await response.text();
+      if (error) {
+        errorText = `${errorText} \n\n ${error}`;
+      }
+    } catch (err) {
+      console.error('Error reading body from request:', err);
     }
-  } catch (err) {
-    console.error('Error reading body from request:', err);
+    console.error(errorText);
   }
-  console.error(errorText);
+  console.log(`${note} task finished.`);
 }
+
+//await send(del_command, "Deleting");
+await send(reg_command, "Registering");

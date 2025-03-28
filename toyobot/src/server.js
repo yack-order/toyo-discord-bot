@@ -8,29 +8,61 @@ import {
   InteractionType,
   verifyKey,
 } from 'discord-interactions';
-import { AWW_COMMAND, INVITE_COMMAND, GET_STORE_PAGE_COMMAND } from './commands.js';
-import { getCuteUrl } from './reddit.js';
-import { InteractionResponseFlags } from 'discord-interactions';
 
-class JsonResponse extends Response {
-  constructor(body, init) {
-    const jsonBody = JSON.stringify(body);
-    init = init || {
-      headers: {
-        'content-type': 'application/json;charset=UTF-8',
-      },
-    };
-    super(jsonBody, init);
-  }
-}
+// Import the command and execution function individually
+import { AWWWW_COMMAND, AWWWW_EXEC } from './commands.js';
+import { INVITE_COMMAND, INVITE_EXEC } from './commands.js';
+import { PING_COMMAND, PING_EXEC } from './commands.js';
+import { SERVER_COMMAND, SERVER_EXEC } from './commands.js';
+import { USER_COMMAND, USER_EXEC } from './commands.js';
+import { YOTO_PLAYLIST_COMMAND, YOTO_PLAYLIST_EXEC } from './commands.js';
+import { YOTO_STORE_COMMAND, YOTO_STORE_EXEC } from './commands.js';
+import { EXTRACT_AUDIO_COMMAND, EXTRACT_AUDIO_EXEC } from './commands.js';
+
+// Import other local requirements
+import { JsonResponse } from './jsonresponse.js';
 
 const router = AutoRouter();
+
+// Respond on HTTP/GET with the basic functions for debugging purposes
+// TODO: Use GET parameters the same way as POST parameters so the functions can operate the same way over GET and POST
+router.get('/awwww', (request, env) => {
+  return AWWWW_EXEC(request, env, "webget");
+});
+
+router.get('/user', (request, env) => {
+  return USER_EXEC(request, env, "webget");
+});
+
+router.get('/server', (request, env) => {
+  return SERVER_EXEC(request, env, "webget");
+});
+
+router.get('/ping', (request, env) => {
+  return PING_EXEC(request, env, "webget");
+});
+
+router.get('/invite', (request, env) => {
+  return INVITE_EXEC(request, env, "webget");
+});
+
+router.get('/yoto-store', (request, env) => {
+  return YOTO_STORE_EXEC(request, env, "webget");
+});
+
+router.get('/yoto-playlist', (request, env) => {
+  return YOTO_PLAYLIST_EXEC(request, env, "webget");
+});
+
+router.get('/extract-audio', (request, env) => {
+  return EXTRACT_AUDIO_EXEC(request, env, "webget");
+});
 
 /**
  * A simple :wave: hello page to verify the worker is working.
  */
 router.get('/', (request, env) => {
-  return new Response(`Hello World! This is a Discord bot meant for The Optimistic Yack Order. \n👋 ${env.DISCORD_APPLICATION_ID}`);
+  return new Response(`👋 ${env.DISCORD_APPLICATION_ID}`);
 });
 
 /**
@@ -58,37 +90,29 @@ router.post('/', async (request, env) => {
   if (interaction.type === InteractionType.APPLICATION_COMMAND) {
     // Most user commands will come as `APPLICATION_COMMAND`.
     switch (interaction.data.name.toLowerCase()) {
-      case AWW_COMMAND.name.toLowerCase(): {
-        const cuteUrl = await getCuteUrl();
-        return new JsonResponse({
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: cuteUrl,
-          },
-        });
+      case AWWWW_COMMAND.name.toLowerCase(): {
+        return AWWWW_EXEC(request, env, interaction);
       }
       case INVITE_COMMAND.name.toLowerCase(): {
-        const applicationId = env.DISCORD_APPLICATION_ID;
-        const INVITE_URL = `https://discord.com/oauth2/authorize?client_id=${applicationId}&scope=applications.commands`;
-        return new JsonResponse({
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: INVITE_URL,
-            flags: InteractionResponseFlags.EPHEMERAL,
-          },
-        });
+        return INVITE_EXEC(request, env, interaction);
       }
-      case GET_STORE_PAGE_COMMAND.name.toLowerCase(): {
-        // Build the response. Best to use other function calls here so this is a short bit of code.
-        var rawmessage = "Sorry, this function is not implemented yet.";
-
-        // Send the message out to Discord.
-        return new JsonResponse({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: {
-          content: rawmessage,
-        },
-        });
+      case PING_COMMAND.name.toLowerCase():{
+        return PING_EXEC(request, env, interaction);
+      }
+      case SERVER_COMMAND.name.toLowerCase():{
+        return SERVER_EXEC(request, env, interaction);
+      }
+      case USER_COMMAND.name.toLowerCase():{
+        return USER_EXEC(request, env, interaction);
+      }
+      case YOTO_STORE_COMMAND.name.toLowerCase():{
+        return YOTO_STORE_EXEC(request, env, interaction);
+      }
+      case YOTO_PLAYLIST_COMMAND.name.toLowerCase():{
+        return YOTO_PLAYLIST_EXEC(request, env, interaction);
+      }
+      case EXTRACT_AUDIO_COMMAND.name.toLowerCase():{
+        return EXTRACT_AUDIO_EXEC(request, env, interaction);
       }
       default:
         return new JsonResponse({ error: 'Unknown Type' }, { status: 400 });
@@ -111,6 +135,7 @@ async function verifyDiscordRequest(request, env) {
   if (!isValidRequest) {
     return { isValid: false };
   }
+  //console.log(JSON.parse(body));
 
   return { interaction: JSON.parse(body), isValid: true };
 }
