@@ -24,7 +24,7 @@ async function respondToInteraction(env, interaction) {
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
           content: 'working on it...',
-          //flags: InteractionResponseFlags.EPHEMERAL, // This makes the response ephemeral (only visible to the user who invoked the command)
+          flags: InteractionResponseFlags.EPHEMERAL, // This makes the response ephemeral (only visible to the user who invoked the command)
         },
       },
     });
@@ -34,18 +34,40 @@ async function respondToInteraction(env, interaction) {
   }
 }
 
+function splitMarkdown(markdown, max_length=1950) {
+  if (markdown.length > max_length) {
+    const firstPart = markdown.slice(0, max_length); // First set of characters
+    const secondPart = markdown.slice(max_length);  // Remaining characters
+    console.log(`Splitting message into two parts: ${firstPart.length} and ${secondPart.length}`);
+    return { firstPart, secondPart };
+  } else {
+    return { firstPart: markdown, secondPart: null }; // No need to split
+  }
+}
+///yoto-store url: https://us.yotoplay.com/products/paw-patrol-pup-pack
 async function sendFollowUp(env, interaction, markdown) {
   const rest = new REST({ version: '10' }).setToken(env.DISCORD_TOKEN); // Ensure your bot token is set in the environment
-  const webhookUrl = Routes.webhook(interaction.application_id, interaction.token);
+  //const webhookUrl = Routes.channelMessages(interaction.channel_id);
+  
+  const { firstPart, secondPart } = splitMarkdown(markdown);
+  const webhookUrl = Routes.webhook(env.DISCORD_APPLICATION_ID, interaction.token);
 
   try {
-    // Send the follow-up message
+    // Send the first part of the follow-up message
     const response = await rest.post(webhookUrl, {
       body: {
-        content: markdown,
+        content: firstPart,
       },
     });
     console.log('Follow-up message sent successfully!', response);
+    //BUG: This is the line where its failing. sometimes the reponse never comes back to the line above, so it is blank in the logs
+    
+    if (secondPart) {
+      console.log('More data to send.');
+      // Send the second part of the follow-up message
+      sendFollowUp(env, response.interaction, secondPart);
+      console.log('Follow-up message sent successfully!', response);
+    }
   } catch (error) {
     console.error('Failed to send follow-up message:', error.message);
   }
@@ -217,6 +239,7 @@ export async function YOTO_STORE_EXEC(request, env, interaction, ctx) {
     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
     data: {
       content: 'Processing request...',
+      flags: InteractionResponseFlags.EPHEMERAL, // This makes the response ephemeral (only visible to the user who invoked the command)
     },
   });
 }

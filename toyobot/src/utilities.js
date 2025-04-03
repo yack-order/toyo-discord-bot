@@ -64,9 +64,9 @@ export function formatDataAsMarkdown(data) {
     }
 
     // Truncate the message if it exceeds 1950 characters
-    if (markdown.length > 1950) {
-        markdown = markdown.substring(0, 1922) + "\n **ERROR**: Text too long."; // Add ellipsis to indicate truncation
-    }
+    //if (markdown.length > 1950) {
+   //     markdown = markdown.substring(0, 1922) + "\n **ERROR**: Text too long."; // Add ellipsis to indicate truncation
+   // }
 
     return markdown;
 }
