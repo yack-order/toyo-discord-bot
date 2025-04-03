@@ -1,6 +1,8 @@
-import { AWWWW_COMMAND, INVITE_COMMAND, PING_COMMAND, SERVER_COMMAND, USER_COMMAND, 
-  YOTO_STORE_COMMAND, YOTO_PLAYLIST_COMMAND,
-  EXTRACT_AUDIO_COMMAND,
+import { AWWWW_COMMAND, INVITE_COMMAND, SERVER_COMMAND, USER_COMMAND,  //non-registered commands
+  PING_COMMAND, //generic
+  YOTO_STORE_COMMAND,  //public store commands
+  EXTRACT_AUDIO_COMMAND, YOTO_PLAYLIST_COMMAND, //private playlist commands
+  EXTRACT_ICONS_COMMAND, //public playlist commands
  } from './commands.js';
 import dotenv from 'dotenv';
 import process from 'node:process';
@@ -33,7 +35,7 @@ const url = `https://discord.com/api/applications/${applicationId}/commands`;
 
 const reg_command = JSON.stringify([PING_COMMAND, 
   YOTO_STORE_COMMAND, YOTO_PLAYLIST_COMMAND,
-  EXTRACT_AUDIO_COMMAND,
+  EXTRACT_AUDIO_COMMAND, EXTRACT_ICONS_COMMAND,
 ]);
 const del_command = JSON.stringify([]);
 

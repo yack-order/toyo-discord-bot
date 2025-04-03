@@ -18,6 +18,7 @@ import { USER_COMMAND, USER_EXEC } from './commands.js';
 import { YOTO_PLAYLIST_COMMAND, YOTO_PLAYLIST_EXEC } from './commands.js';
 import { YOTO_STORE_COMMAND, YOTO_STORE_EXEC } from './commands.js';
 import { EXTRACT_AUDIO_COMMAND, EXTRACT_AUDIO_EXEC } from './commands.js';
+import { EXTRACT_ICONS_COMMAND, EXTRACT_ICONS_EXEC } from './commands.js';
 
 // Import other local requirements
 import { JsonResponse } from './jsonresponse.js';
@@ -56,6 +57,10 @@ router.get('/yoto-playlist', (request, env) => {
 
 router.get('/extract-audio', (request, env) => {
   return EXTRACT_AUDIO_EXEC(request, env, "webget");
+});
+
+router.get('/extract-icons', (request, env) => {
+  return EXTRACT_ICONS_EXEC(request, env, "webget");
 });
 
 /**
@@ -114,9 +119,30 @@ router.post('/', async (request, env) => {
       case EXTRACT_AUDIO_COMMAND.name.toLowerCase():{
         return EXTRACT_AUDIO_EXEC(request, env, interaction);
       }
+      case EXTRACT_ICONS_COMMAND.name.toLowerCase():{
+        return EXTRACT_ICONS_EXEC(request, env, interaction);
+      }
       default:
+        console.error('Unknown Command\n\n');
+        console.log('Interaction:', interaction);
+        console.log('Interaction Data:', interaction.data);
+        console.log('Request', request);
         return new JsonResponse({ error: 'Unknown Type' }, { status: 400 });
     }
+  }
+
+  if (interaction.type === InteractionType.MESSAGE_COMPONENT) {
+    // The `MESSAGE_COMPONENT` message is used for all button and select interactions.
+    console.log('Message Component Interaction:', interaction);
+    switch (interaction.data.custom_id.toLowerCase()) {
+      default:
+        console.error('Unknown Message Component\n\n');
+        console.log('Interaction:', interaction);
+        console.log('Interaction Data:', interaction.data);
+        console.log('Request', request);
+        return new JsonResponse({ error: 'Unknown Type' }, { status: 400 });
+    }
+    
   }
 
   console.error('Unknown Type');

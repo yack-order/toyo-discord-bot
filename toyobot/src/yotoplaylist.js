@@ -54,6 +54,37 @@ export async function GetTrackURLs(url){
     }
 }
 
+export async function GetIconURLs(url){
+    try{
+        // Fetch the content from the provided URL
+        const response = await axios.get(url);
+        const contentType = response.headers['content-type'];
+
+        let card = response.data?.card;
+        return extractIcons(card);
+    } catch (e) {
+        return { error: e.message || "Error fetching data" };
+    }
+}
+
+function extractIcons(card) {
+    const data = []; // Declare the data array
+    //"props.pageProps.card.content.chapters[0].display.icon16x16"
+    const chapters = card.content?.chapters || [];
+    chapters.forEach((chapter, chapterIndex) => {
+        const chapterDisplayInfo = chapter.display; // Get the icon for the chapter
+        if (chapterDisplayInfo) {
+            chapter.tracks?.forEach((track, trackIndex) => {
+                const trackDisplayInfo = track.display; // Look for an icon for the track
+                const iconUrl = trackDisplayInfo?.icon16x16 || chapterDisplayInfo.icon16x16; // Fallback to chapter icon
+                // Push the formatted entry into the data collection
+                data.push(`${chapterIndex}-${trackIndex}: <${track.trackUrl}>`);
+            }); // Close forEach
+        }
+    });
+    return data; // Return the data array
+}
+
 /**
  * Extracts track URLs from the card data and formats them as index: url.
  * 

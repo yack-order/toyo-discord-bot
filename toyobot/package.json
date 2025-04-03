@@ -18,6 +18,7 @@
   "author": "Justin Beckwith <justin.beckwith@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "@discordjs/rest": "^2.4.3",
     "axios": "^1.8.4",
     "discord-interactions": "^4.0.0",
     "itty-router": "^5.0.9"

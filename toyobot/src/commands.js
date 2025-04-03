@@ -45,6 +45,7 @@ export function INVITE_EXEC(request, env, interaction) {
   });
 };
 
+
 /*******************************************
  * /ping 
  *******************************************/
@@ -60,6 +61,7 @@ export function PING_EXEC(request, env, interaction) {
       }
   })
 };
+
 
 /*******************************************
  * /server 
@@ -81,6 +83,7 @@ Verification level: ${interaction.guild.verificationLevel}`,
   })
 };
 
+
 /*******************************************
  * /user 
  *******************************************/
@@ -99,6 +102,7 @@ nickname: ${interaction.member.nick}`,
       }
   })
 };
+
 
 /*******************************************
  * /yoto-store <url>
@@ -128,6 +132,7 @@ export async function YOTO_STORE_EXEC(request, env, interaction) {
       }
   });
 }
+
 
 /*******************************************
  * /yoto-playlist <url> <show>
@@ -212,9 +217,41 @@ export async function EXTRACT_AUDIO_EXEC(request, env, interaction) {
   const markdown = formatDataAsMarkdown(data);
   return new JsonResponse({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-      //flags: InteractionResponseFlags.EPHEMERAL, //only show the message to the user who invoked the command
+      flags: InteractionResponseFlags.EPHEMERAL, //only show the message to the user who invoked the command
       data: {
           content: markdown,
       }
   });
 };
+
+
+/*******************************************
+ * /extract-icons <url>
+ * TODO -- this is incomplete
+ *******************************************/
+import { GetIconURLs } from './yotoplaylist.js';
+export const EXTRACT_ICONS_COMMAND = {
+  name: 'extract-icons',
+  description: 'Get icon files from a playlist URL.\n this is incomplete.',
+  options: [
+    {
+      name: 'url',
+      description: 'URL of the playlist page. e.g.: https://yoto.io/hMkni?84brH2BNuhyl=e79sopPfwKnBL',
+      required: true,
+      type: 3,
+    }
+  ],
+};
+export async function EXTRACT_ICONS_EXEC(request, env, interaction) {  
+  const url = interaction.data.options[0].value;
+  const data = await GetIconURLs(url);
+  const markdown = formatDataAsMarkdown(data);
+  return new JsonResponse({
+      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+      flags: InteractionResponseFlags.EPHEMERAL, //only show the message to the user who invoked the command
+      data: {
+          content: markdown,
+      }
+  });
+};
+
