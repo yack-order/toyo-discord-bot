@@ -75,7 +75,7 @@ router.get('/', (request, env) => {
  * include a JSON payload described here:
  * https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object
  */
-router.post('/', async (request, env) => {
+router.post('/', async (request, env, ctx) => {
   const { isValid, interaction } = await server.verifyDiscordRequest(
     request,
     env,
@@ -111,7 +111,7 @@ router.post('/', async (request, env) => {
         return USER_EXEC(request, env, interaction);
       }
       case YOTO_STORE_COMMAND.name.toLowerCase():{
-        return YOTO_STORE_EXEC(request, env, interaction);
+        return YOTO_STORE_EXEC(request, env, interaction, ctx);
       }
       case YOTO_PLAYLIST_COMMAND.name.toLowerCase():{
         return YOTO_PLAYLIST_EXEC(request, env, interaction);

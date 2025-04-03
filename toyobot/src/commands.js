@@ -7,6 +7,54 @@ import { InteractionResponseFlags, InteractionResponseType, InteractionType } fr
 import { JsonResponse } from './jsonresponse.js';
 import { formatDataAsMarkdown } from './utilities.js';
 
+//==================================
+//==================================
+// helper functions
+import { REST } from '@discordjs/rest';
+import { Routes } from 'discord-api-types/v10';
+
+async function respondToInteraction(env, interaction) {
+  const rest = new REST({ version: '10' }).setToken(env.DISCORD_TOKEN); // Ensure your bot token is set in the environment
+  const url = Routes.interactionCallback(interaction.id, interaction.token);
+
+  try {
+    // Send the acknowledgment request
+    const response = await rest.post(url, {
+      body: {
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: 'working on it...',
+          //flags: InteractionResponseFlags.EPHEMERAL, // This makes the response ephemeral (only visible to the user who invoked the command)
+        },
+      },
+    });
+    console.log('Interaction responded successfully!', response);
+  } catch (error) {
+    console.error('Failed to respond to interaction:', error.message);
+  }
+}
+
+async function sendFollowUp(env, interaction, markdown) {
+  const rest = new REST({ version: '10' }).setToken(env.DISCORD_TOKEN); // Ensure your bot token is set in the environment
+  const webhookUrl = Routes.webhook(interaction.application_id, interaction.token);
+
+  try {
+    // Send the follow-up message
+    const response = await rest.post(webhookUrl, {
+      body: {
+        content: markdown,
+      },
+    });
+    console.log('Follow-up message sent successfully!', response);
+  } catch (error) {
+    console.error('Failed to send follow-up message:', error.message);
+  }
+}
+//==================================
+//==================================
+
+
+
 /*******************************************
  * /awwww 
  *******************************************/
@@ -121,7 +169,7 @@ export const YOTO_STORE_COMMAND = {
     }
   ],
 };
-export async function YOTO_STORE_EXEC(request, env, interaction) {
+/*export async function YOTO_STORE_EXEC(request, env, interaction) {
   const url = interaction.data.options[0].value;
   const data = await ReadStoreData(url);
   const markdown = formatDataAsMarkdown(data);
@@ -130,6 +178,46 @@ export async function YOTO_STORE_EXEC(request, env, interaction) {
       data: {
           content: markdown,
       }
+  });
+}*/
+export async function YOTO_STORE_EXEC(request, env, interaction, ctx) {
+  const url = interaction.data.options[0].value;
+
+  console.log('YOTO_STORE_EXEC', url);
+
+  // Create a promise for the async operations
+  const processPromise = (async () => {
+    try {
+      console.log(`Inside waitUntil, Sending initial acknowledgment...`);
+  
+      // Send the initial acknowledgment using the helper function
+      await respondToInteraction(env, interaction);
+
+      console.log('Fetching data from Yoto Store...');
+      // Fetch the data and format it as markdown
+      const data = await ReadStoreData(url);
+      console.log('Data fetched successfully:', data);
+      const markdown = formatDataAsMarkdown(data);
+      console.log('Formatted data:', markdown);
+
+      // Send the follow-up message using the helper function
+      await sendFollowUp(env, interaction, markdown);
+      console.log('Follow-up message sent successfully!');
+    } catch (error) {
+      console.error("Error processing YOTO_STORE_EXEC:", error.message);
+      // Send an error follow-up message if something goes wrong
+      await sendFollowUp(env, interaction, "An error occurred while processing your request.");
+    }
+  })();
+
+  // Register the promise with waitUntil
+  ctx.waitUntil(processPromise);
+
+  return new JsonResponse({
+    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+    data: {
+      content: 'Processing request...',
+    },
   });
 }
 
