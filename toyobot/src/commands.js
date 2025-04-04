@@ -365,7 +365,7 @@ export const DEV_COMMAND = {
 export async function DEV_EXEC(request, env, interaction, ctx) {
   const url = interaction.data.options[0].value;
 
-  console.log('YOTO_STORE_EXEC', url);
+  console.log('DEV_EXEC', url);
 
   // Create a promise for the async operations
   const processPromise = (async () => {
@@ -386,7 +386,7 @@ export async function DEV_EXEC(request, env, interaction, ctx) {
       await sendFollowUp(env, interaction, markdown);
       console.log('Follow-up message sent successfully!');
     } catch (error) {
-      console.error("Error processing YOTO_STORE_EXEC:", error.message);
+      console.error("Error processing DEV_EXEC:\n", error.message, "\n", error.stack);
       // Send an error follow-up message if something goes wrong
       await sendFollowUp(env, interaction, "An error occurred while processing your request.");
     }
