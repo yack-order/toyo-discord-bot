@@ -15,26 +15,7 @@ import { Routes } from 'discord-api-types/v10';
 
 const MAX_LENGTH = 1950; // Discord's maximum message length is 2000 characters, but we leave some space for formatting
 
-function getDiscordClient(token){
-  const { Client, Events, GatewayIntentBits } = require('discord.js');
-  const client = new Client({ intents: [GatewayIntentBits.Guilds] });
-  client.once(Events.ClientReady, readyClient => {
-    console.log(`Ready! Logged in as ${readyClient.user.tag}`);
-  });
-  client.login(token);
-
-  return client;
-}
-
 async function respondToInteraction(env, interaction) {
-  const client = getDiscordClient(env.DISCORD_TOKEN);
-  const channel = client.channels.cache.get(interaction.channel_id);
-  if (!channel) {
-    console.error('Channel not found');
-    return;
-  }
-  channel.send('discord.js test seems to work?');
-
   const rest = new REST({ version: '10' }).setToken(env.DISCORD_TOKEN); // Ensure your bot token is set in the environment
   const url = Routes.interactionCallback(interaction.id, interaction.token);
 
@@ -386,7 +367,7 @@ export async function DEV_EXEC(request, env, interaction, ctx) {
       await sendFollowUp(env, interaction, markdown);
       console.log('Follow-up message sent successfully!');
     } catch (error) {
-      console.error("Error processing DEV_EXEC:\n", error.message, "\n", error.stack);
+      console.error("Error processing DEV_EXEC:\n\n", error.messagen "\n\n", error.stack);
       // Send an error follow-up message if something goes wrong
       await sendFollowUp(env, interaction, "An error occurred while processing your request.");
     }
@@ -464,4 +445,3 @@ export async function EXTRACT_ICONS_EXEC(request, env, interaction) {
       }
   });
 };
-
