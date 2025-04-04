@@ -13,6 +13,7 @@ import {
 import { AWWWW_COMMAND, AWWWW_EXEC } from './commands.js';
 import { INVITE_COMMAND, INVITE_EXEC } from './commands.js';
 import { PING_COMMAND, PING_EXEC } from './commands.js';
+import { DEV_COMMAND, DEV_EXEC } from './commands.js';
 import { SERVER_COMMAND, SERVER_EXEC } from './commands.js';
 import { USER_COMMAND, USER_EXEC } from './commands.js';
 import { YOTO_PLAYLIST_COMMAND, YOTO_PLAYLIST_EXEC } from './commands.js';
@@ -103,6 +104,9 @@ router.post('/', async (request, env, ctx) => {
       }
       case PING_COMMAND.name.toLowerCase():{
         return PING_EXEC(request, env, interaction);
+      }
+      case DEV_COMMAND.name.toLowerCase():{
+        return DEV_EXEC(request, env, interaction);
       }
       case SERVER_COMMAND.name.toLowerCase():{
         return SERVER_EXEC(request, env, interaction);

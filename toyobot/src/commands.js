@@ -13,6 +13,8 @@ import { formatDataAsMarkdown } from './utilities.js';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v10';
 
+const MAX_LENGTH = 1950; // Discord's maximum message length is 2000 characters, but we leave some space for formatting
+
 async function respondToInteraction(env, interaction) {
   const rest = new REST({ version: '10' }).setToken(env.DISCORD_TOKEN); // Ensure your bot token is set in the environment
   const url = Routes.interactionCallback(interaction.id, interaction.token);
@@ -34,43 +36,97 @@ async function respondToInteraction(env, interaction) {
   }
 }
 
-function splitMarkdown(markdown, max_length=1950) {
+function isMessageTooLong(markdown, max_length=MAX_LENGTH) {
+  return markdown.length > max_length;
+}
+
+function splitMarkdown(markdown, max_length = MAX_LENGTH) {
   if (markdown.length > max_length) {
-    const firstPart = markdown.slice(0, max_length); // First set of characters
-    const secondPart = markdown.slice(max_length);  // Remaining characters
-    console.log(`Splitting message into two parts: ${firstPart.length} and ${secondPart.length}`);
+    // Find the last newline character before max_length
+    const splitIndex = markdown.lastIndexOf('\n', max_length);
+
+    // If a newline character is found, split at that point
+    if (splitIndex !== -1) {
+      const firstPart = markdown.slice(0, splitIndex); // First part up to the newline
+      const secondPart = markdown.slice(splitIndex + 1); // Remaining part after the newline
+      console.log(`Splitting message into two parts at newline: ${firstPart.length} and ${secondPart.length}`);
+      return { firstPart, secondPart };
+    }
+
+    // If no newline is found, fall back to splitting at max_length
+    const firstPart = markdown.slice(0, max_length);
+    const secondPart = markdown.slice(max_length);
+    console.log(`Splitting message into two parts at max_length: ${firstPart.length} and ${secondPart.length}`);
     return { firstPart, secondPart };
   } else {
     return { firstPart: markdown, secondPart: null }; // No need to split
   }
 }
-///yoto-store url: https://us.yotoplay.com/products/paw-patrol-pup-pack
+///yoto-dev url: https://us.yotoplay.com/products/paw-patrol-pup-pack
 async function sendFollowUp(env, interaction, markdown) {
   const rest = new REST({ version: '10' }).setToken(env.DISCORD_TOKEN); // Ensure your bot token is set in the environment
   //const webhookUrl = Routes.channelMessages(interaction.channel_id);
-  
-  const { firstPart, secondPart } = splitMarkdown(markdown);
-  const webhookUrl = Routes.webhook(env.DISCORD_APPLICATION_ID, interaction.token);
+  //const webhookUrl = Routes.webhook(env.DISCORD_APPLICATION_ID, interaction.token);
 
+  if(!isMessageTooLong(markdown)) {
+    //message is short enough, so it can be sent in one go
+    console.log('Sending follow-up message:', markdown);
+    try {
+      // Send the first part of the follow-up message
+      const webhookUrl = `https://discord.com/api/v10/webhooks/${env.DISCORD_APPLICATION_ID}/${interaction.token}/callback`;
+      const response = await rest.post(webhookUrl, {
+        body: {
+          content: markdown,
+        },
+      });
+      console.log('Follow-up message sent successfully!', response);
+    }
+    catch (error) {
+      console.error('Failed to send follow-up message:', error.message);
+    }
+  }
+  else if(isMessageTooLong(markdown)){
+    console.log('Message is too long, splitting it.');
+    const msgcount = await sendSplitFollowUp(env, interaction.token, markdown);
+    console.log(`All messages completed in '${msgcount}' messages.`);
+  }else{
+    console.log('Message is somehow invalid.');
+  }
+}
+
+async function sendSplitFollowUp(env, token, markdown, isFirst=true) {
+  const rest = new REST({ version: '10' }).setToken(env.DISCORD_TOKEN); // Ensure your bot token is set in the environment
+  let webhookUrl;
+  if(isFirst){
+    webhookUrl = `https://discord.com/api/v10/webhooks/${env.DISCORD_APPLICATION_ID}/${token}/callback`;
+  }else if (!isFirst){
+    webhookUrl = `https://discord.com/api/v10/webhooks/${env.DISCORD_APPLICATION_ID}/${token}`;
+  }
+  // Split the message into two parts
+  const { firstPart, secondPart } = splitMarkdown(markdown);
+  console.log(`First part:(${firstPart.length})`, firstPart);
+  console.log(`Second part:(${secondPart.length})`, secondPart);
+  let msgcount = 0;
+  // Send the first part of the message
   try {
-    // Send the first part of the follow-up message
-    const response = await rest.post(webhookUrl, {
+    await rest.post(webhookUrl, {
       body: {
         content: firstPart,
       },
     });
-    console.log('Follow-up message sent successfully!', response);
-    //BUG: This is the line where its failing. sometimes the reponse never comes back to the line above, so it is blank in the logs
-    
-    if (secondPart) {
-      console.log('More data to send.');
-      // Send the second part of the follow-up message
-      sendFollowUp(env, response.interaction, secondPart);
-      console.log('Follow-up message sent successfully!', response);
-    }
-  } catch (error) {
-    console.error('Failed to send follow-up message:', error.message);
+    console.log('First part sent successfully!');
+    msgcount++;
   }
+  catch (error) {
+    console.error('Failed to send first part:', error.message);
+  }
+  // If there is a second part, send it
+  if (secondPart) {
+    console.log('Sending second part:', secondPart);
+    msgcount += await sendSplitFollowUp(env, token, secondPart, false);
+    console.log('Second part sent successfully!');
+  }
+  return msgcount;
 }
 //==================================
 //==================================
@@ -191,59 +247,21 @@ export const YOTO_STORE_COMMAND = {
     }
   ],
 };
-/*export async function YOTO_STORE_EXEC(request, env, interaction) {
+export async function YOTO_STORE_EXEC(request, env, interaction) {
   const url = interaction.data.options[0].value;
   const data = await ReadStoreData(url);
   const markdown = formatDataAsMarkdown(data);
+  let {firstPart, secondPart} = splitMarkdown(markdown); //just discard the second part
+  firstPart += "\n***ERR: Truncated message***";
+  console.log(`First part:(${firstPart.length})`, firstPart);
+  console.log(`Second part:(${secondPart.length})`, secondPart);
   return new JsonResponse({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
       data: {
-          content: markdown,
+          content: firstPart,
       }
   });
-}*/
-export async function YOTO_STORE_EXEC(request, env, interaction, ctx) {
-  const url = interaction.data.options[0].value;
-
-  console.log('YOTO_STORE_EXEC', url);
-
-  // Create a promise for the async operations
-  const processPromise = (async () => {
-    try {
-      console.log(`Inside waitUntil, Sending initial acknowledgment...`);
-  
-      // Send the initial acknowledgment using the helper function
-      await respondToInteraction(env, interaction);
-
-      console.log('Fetching data from Yoto Store...');
-      // Fetch the data and format it as markdown
-      const data = await ReadStoreData(url);
-      console.log('Data fetched successfully:', data);
-      const markdown = formatDataAsMarkdown(data);
-      console.log('Formatted data:', markdown);
-
-      // Send the follow-up message using the helper function
-      await sendFollowUp(env, interaction, markdown);
-      console.log('Follow-up message sent successfully!');
-    } catch (error) {
-      console.error("Error processing YOTO_STORE_EXEC:", error.message);
-      // Send an error follow-up message if something goes wrong
-      await sendFollowUp(env, interaction, "An error occurred while processing your request.");
-    }
-  })();
-
-  // Register the promise with waitUntil
-  ctx.waitUntil(processPromise);
-
-  return new JsonResponse({
-    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-    data: {
-      content: 'Processing request...',
-      flags: InteractionResponseFlags.EPHEMERAL, // This makes the response ephemeral (only visible to the user who invoked the command)
-    },
-  });
 }
-
 
 /*******************************************
  * /yoto-playlist <url> <show>
@@ -304,6 +322,67 @@ export async function YOTO_PLAYLIST_EXEC(request, env, interaction) {
   });
 };
 
+
+//==============================================================================================
+//==============================================================================================
+//stuff below here is not working yet
+/*******************************************
+ * /yoto-store <url>
+ * /yoto-store url: https://us.yotoplay.com/products/paw-patrol-pup-pack
+ *******************************************/
+export const DEV_COMMAND = {
+  name: 'yoto-dev',
+  description: 'Dev/testing command functionality.',
+  options: [
+    {
+      name: 'url',
+      description: 'URL of the store page. e.g.: https://us.yotoplay.com/products/frog-and-toad-audio-collection',
+      required: true,
+      type: 3,
+    }
+  ],
+};
+export async function DEV_EXEC(request, env, interaction, ctx) {
+  const url = interaction.data.options[0].value;
+
+  console.log('YOTO_STORE_EXEC', url);
+
+  // Create a promise for the async operations
+  const processPromise = (async () => {
+    try {
+      console.log(`Inside waitUntil, Sending initial acknowledgment...`);
+  
+      // Send the initial acknowledgment using the helper function
+      await respondToInteraction(env, interaction);
+
+      console.log('Fetching data from Yoto Store...');
+      // Fetch the data and format it as markdown
+      const data = await ReadStoreData(url);
+      console.log('Data fetched successfully:', data);
+      const markdown = formatDataAsMarkdown(data);
+      console.log('Formatted data:', markdown);
+
+      // Send the follow-up message using the helper function
+      await sendFollowUp(env, interaction, markdown);
+      console.log('Follow-up message sent successfully!');
+    } catch (error) {
+      console.error("Error processing YOTO_STORE_EXEC:", error.message);
+      // Send an error follow-up message if something goes wrong
+      await sendFollowUp(env, interaction, "An error occurred while processing your request.");
+    }
+  })();
+
+  // Register the promise with waitUntil
+  ctx.waitUntil(processPromise);
+
+  return new JsonResponse({
+    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+    data: {
+      content: 'Processing request...',
+      flags: InteractionResponseFlags.EPHEMERAL, // This makes the response ephemeral (only visible to the user who invoked the command)
+    },
+  });
+}
 
 /*******************************************
  * /extract-audio <url>
