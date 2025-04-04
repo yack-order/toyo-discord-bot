@@ -367,7 +367,7 @@ export async function DEV_EXEC(request, env, interaction, ctx) {
       await sendFollowUp(env, interaction, markdown);
       console.log('Follow-up message sent successfully!');
     } catch (error) {
-      console.error("Error processing DEV_EXEC:\n\n", error.messagen "\n\n", error.stack);
+      console.error("Error processing DEV_EXEC:\n\n", error.message, "\n\n", error.stack);
       // Send an error follow-up message if something goes wrong
       await sendFollowUp(env, interaction, "An error occurred while processing your request.");
     }
