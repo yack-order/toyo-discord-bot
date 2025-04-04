@@ -40,7 +40,7 @@ function isMessageTooLong(markdown, max_length=MAX_LENGTH) {
   return markdown.length > max_length;
 }
 
-function splitMarkdown(markdown, max_length = MAX_LENGTH) {
+function splitMarkdown(markdown, max_length=MAX_LENGTH) {
   if (markdown.length > max_length) {
     // Find the last newline character before max_length
     const splitIndex = markdown.lastIndexOf('\n', max_length);
@@ -62,6 +62,7 @@ function splitMarkdown(markdown, max_length = MAX_LENGTH) {
     return { firstPart: markdown, secondPart: null }; // No need to split
   }
 }
+
 ///yoto-dev url: https://us.yotoplay.com/products/paw-patrol-pup-pack
 async function sendFollowUp(env, interaction, markdown) {
   const rest = new REST({ version: '10' }).setToken(env.DISCORD_TOKEN); // Ensure your bot token is set in the environment
