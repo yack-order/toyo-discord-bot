@@ -1,7 +1,7 @@
 {
-  "name": "awwbot",
-  "version": "1.0.0",
-  "description": "A simple discord bot that uses intents to post pictures from r/aww",
+  "name": "toyobot",
+  "version": "1.2.3",
+  "description": "A discord bot designed for The Optimistic Yack Order (TOYO).",
   "type": "module",
   "private": true,
   "main": "src/server.js",
@@ -15,12 +15,13 @@
     "publish": "wrangler deploy"
   },
   "keywords": [],
-  "author": "Justin Beckwith <justin.beckwith@gmail.com>",
-  "license": "MIT",
+  "author": "Chris Holt <holtcm01@gmail.com>",
+  "license": "AGPL-3.0-only",
   "dependencies": {
     "@discordjs/rest": "^2.4.3",
     "axios": "^1.8.4",
     "discord-interactions": "^4.0.0",
+    "discord.js": "^14.18.0",
     "itty-router": "^5.0.9"
   },
   "devDependencies": {

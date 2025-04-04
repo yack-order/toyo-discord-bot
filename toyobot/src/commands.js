@@ -15,7 +15,26 @@ import { Routes } from 'discord-api-types/v10';
 
 const MAX_LENGTH = 1950; // Discord's maximum message length is 2000 characters, but we leave some space for formatting
 
+function getDiscordClient(token){
+  const { Client, Events, GatewayIntentBits } = require('discord.js');
+  const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+  client.once(Events.ClientReady, readyClient => {
+    console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+  });
+  client.login(token);
+
+  return client;
+}
+
 async function respondToInteraction(env, interaction) {
+  const client = getDiscordClient(env.DISCORD_TOKEN);
+  const channel = client.channels.cache.get(interaction.channel_id);
+  if (!channel) {
+    console.error('Channel not found');
+    return;
+  }
+  channel.send('discord.js test seems to work?');
+
   const rest = new REST({ version: '10' }).setToken(env.DISCORD_TOKEN); // Ensure your bot token is set in the environment
   const url = Routes.interactionCallback(interaction.id, interaction.token);
 

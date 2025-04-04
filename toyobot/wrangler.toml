@@ -3,7 +3,8 @@
 # https://developers.cloudflare.com/workers/wrangler/configuration/
 name = "toyobot"
 main = "./src/server.js"
-compatibility_date = "2023-05-18"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
 
 [observability]
 enabled = true
