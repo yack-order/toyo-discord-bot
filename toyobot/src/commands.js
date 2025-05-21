@@ -16,11 +16,27 @@ import { Routes } from 'discord-api-types/v10';
 const MAX_LENGTH = 1950; // Discord's maximum message length is 2000 characters, but we leave some space for formatting
 
 async function respondToInteraction(env, interaction) {
-  const rest = new REST({ version: '10' }).setToken(env.DISCORD_TOKEN); // Ensure your bot token is set in the environment
+  console.log('Starting respondToInteraction function...');
+  
+  const rest = new REST({ version: '10' }).setToken(env.DISCORD_TOKEN);
+  console.log('REST client initialized with token.');
+
   const url = Routes.interactionCallback(interaction.id, interaction.token);
+  console.log(`Generated interaction callback URL: ${url}`);
+
+  if (!interaction) {
+    console.error('Interaction object is null or undefined.');
+    return;
+  }
+
+  if (!interaction.token) {
+    console.error('Interaction token is null or undefined.');
+    return;
+  }
+
+  console.log('Interaction and token are valid. Proceeding to send acknowledgment...');
 
   try {
-    // Send the acknowledgment request
     const response = await rest.post(url, {
       body: {
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -33,17 +49,20 @@ async function respondToInteraction(env, interaction) {
     console.log('Interaction responded successfully!', response);
   } catch (error) {
     console.error('Failed to respond to interaction:', error.message);
+    console.error('Error stack trace:', error.stack);
   }
+
+  console.log('Exiting respondToInteraction function.');
 }
 
-function isMessageTooLong(markdown, max_length=MAX_LENGTH) {
-  return markdown.length > max_length;
+function isMessageTooLong(markdown) {
+  return markdown.length > MAX_LENGTH;
 }
 
-function splitMarkdown(markdown, max_length=MAX_LENGTH) {
-  if (markdown.length > max_length) {
+function splitMarkdown(markdown) {
+  if (isMessageTooLong(markdown)) {
     // Find the last newline character before max_length
-    const splitIndex = markdown.lastIndexOf('\n', max_length);
+    const splitIndex = markdown.lastIndexOf('\n', MAX_LENGTH);
 
     // If a newline character is found, split at that point
     if (splitIndex !== -1) {
@@ -54,8 +73,8 @@ function splitMarkdown(markdown, max_length=MAX_LENGTH) {
     }
 
     // If no newline is found, fall back to splitting at max_length
-    const firstPart = markdown.slice(0, max_length);
-    const secondPart = markdown.slice(max_length);
+    const firstPart = markdown.slice(0, MAX_LENGTH);
+    const secondPart = markdown.slice(MAX_LENGTH);
     console.log(`Splitting message into two parts at max_length: ${firstPart.length} and ${secondPart.length}`);
     return { firstPart, secondPart };
   } else {
@@ -68,8 +87,9 @@ async function sendFollowUp(env, interaction, markdown) {
   const rest = new REST({ version: '10' }).setToken(env.DISCORD_TOKEN); // Ensure your bot token is set in the environment
   //const webhookUrl = Routes.channelMessages(interaction.channel_id);
   //const webhookUrl = Routes.webhook(env.DISCORD_APPLICATION_ID, interaction.token);
+  const istoolong = isMessageTooLong(markdown);
 
-  if(!isMessageTooLong(markdown)) {
+  if(!istoolong) {
     //message is short enough, so it can be sent in one go
     console.log('Sending follow-up message:', markdown);
     try {
@@ -86,7 +106,7 @@ async function sendFollowUp(env, interaction, markdown) {
       console.error('Failed to send follow-up message:', error.message);
     }
   }
-  else if(isMessageTooLong(markdown)){
+  else if(istoolong){
     console.log('Message is too long, splitting it.');
     const msgcount = await sendSplitFollowUp(env, interaction.token, markdown);
     console.log(`All messages completed in '${msgcount}' messages.`);
@@ -253,7 +273,10 @@ export async function YOTO_STORE_EXEC(request, env, interaction) {
   const data = await ReadStoreData(url);
   const markdown = formatDataAsMarkdown(data);
   let {firstPart, secondPart} = splitMarkdown(markdown); //just discard the second part
-  firstPart += "\n***ERR: Truncated message***";
+  
+  if (secondPart) {
+    firstPart += "\n***ERR: Truncated message***";
+  }
   console.log(`First part:(${firstPart.length})`, firstPart);
   console.log(`Second part:(${secondPart.length})`, secondPart);
   return new JsonResponse({
