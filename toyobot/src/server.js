@@ -20,6 +20,8 @@ import { YOTO_PLAYLIST_COMMAND, YOTO_PLAYLIST_EXEC } from './commands.js';
 import { YOTO_STORE_COMMAND, YOTO_STORE_EXEC } from './commands.js';
 import { EXTRACT_AUDIO_COMMAND, EXTRACT_AUDIO_EXEC } from './commands.js';
 import { EXTRACT_ICONS_COMMAND, EXTRACT_ICONS_EXEC } from './commands.js';
+import { ARCHIVE_LOOKUP_COMMAND, ARCHIVE_LOOKUP_EXEC } from './commands.js';
+
 
 // Import other local requirements
 import { JsonResponse } from './jsonresponse.js';
@@ -62,6 +64,10 @@ router.get('/extract-audio', (request, env) => {
 
 router.get('/extract-icons', (request, env) => {
   return EXTRACT_ICONS_EXEC(request, env, "webget");
+});
+
+router.get('/archive-lookup', (request, env) => {
+  return EXTRACT_ICONS_EXEC(request, env, request.query.id  || "webget" );
 });
 
 /**
@@ -125,6 +131,9 @@ router.post('/', async (request, env, ctx) => {
       }
       case EXTRACT_ICONS_COMMAND.name.toLowerCase():{
         return EXTRACT_ICONS_EXEC(request, env, interaction);
+      }
+      case ARCHIVE_LOOKUP_COMMAND.name.toLowerCase():{
+        return ARCHIVE_LOOKUP_EXEC(request, env, interaction);
       }
       default:
         console.error('Unknown Command\n\n');

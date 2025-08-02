@@ -115,6 +115,76 @@ Pins to relevant documentation that i've been using.
 
 ---
 
+# Using the Google Sheets API (Public Sheet Method)
+
+If your Google Sheet is set to **Anyone with the link can view**, you can access it without authentication using the Google Sheets API and an API key. This is suitable for read-only access to public data.
+
+---
+
+### 1. Make Your Google Sheet Public
+
+- Open your Google Sheet.
+- Click **Share**.
+- Under "General access," select **Anyone with the link** and set to **Viewer**.
+
+---
+
+### 2. Get Your Spreadsheet ID
+
+- The Spreadsheet ID is the long string in your sheet's URL:
+  ```
+  https://docs.google.com/spreadsheets/d/<SPREADSHEET_ID>/edit#gid=0
+  ```
+
+---
+
+### 3. Get a Google API Key
+
+- Go to the [Google Cloud Console](https://console.cloud.google.com/).
+- Create or select a project.
+- Go to **APIs & Services > Credentials**.
+- Click **Create Credentials** > **API key**.
+- Copy your API key.
+
+---
+
+### 4. Fetch Data from the Sheet
+
+You can use a simple HTTP request to get data from your sheet.  
+Example (for Sheet1, range A1:Z100):
+
+```sh
+curl "https://sheets.googleapis.com/v4/spreadsheets/<SPREADSHEET_ID>/values/Sheet1!A1:Z100?key=<YOUR_API_KEY>"
+```
+
+Or in JavaScript:
+
+```javascript
+const sheetId = "<SPREADSHEET_ID>";
+const apiKey = "<YOUR_API_KEY>";
+const range = "Sheet1!A1:Z100";
+const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}?key=${apiKey}`;
+
+fetch(url)
+  .then(res => res.json())
+  .then(data => console.log(data.values));
+```
+
+---
+
+### 5. Store the Public Sheet URL in Your `.dev.vars`
+
+```plaintext
+ARCHIVE_SHEETS_DB_URL: "https://docs.google.com/spreadsheets/d/<SPREADSHEET_ID>/edit?usp=sharing"
+```
+
+---
+
+**Note:**  
+- This method is **read-only** and exposes your data to anyone with the link.
+- For private or write access, use a service account as described in the previous section.
+
+
 ---
 # This junk below came from some copilot ideation and has not been implemented yet. 
 The code it generated lives in a file called `copilot_draft_toyobot.js`. As any of it becomes usable it will be converted into commands and pushed into the `./toyobot/src` folder structure.
