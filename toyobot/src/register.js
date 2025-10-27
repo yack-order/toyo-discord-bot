@@ -6,10 +6,10 @@ import { USER_COMMAND } from './commands/user.js';
 import { YOTO_STORE_COMMAND } from './commands.js';
 import { EXTRACT_AUDIO_COMMAND } from './commands.js';
 import { YOTO_PLAYLIST_COMMAND } from './commands/yoto-playlist.js';
-import { EXTRACT_ICONS_COMMAND } from './commands.js';
-import { ARCHIVE_LOOKUP_COMMAND } from './commands.js';
-import { MYO_SEARCH_COMMAND } from './commands.js';
-import { MYO_SUBMIT_COMMAND } from './commands.js';
+import { EXTRACT_ICONS_COMMAND } from './commands/extract-icons.js';
+import { ARCHIVE_LOOKUP_COMMAND } from './commands/archive-lookup.js';
+import { MYO_SEARCH_COMMAND } from './commands/myo-search.js';
+import { MYO_SUBMIT_COMMAND } from './commands/myo-submit.js';
 import dotenv from 'dotenv';
 import process from 'node:process';
 

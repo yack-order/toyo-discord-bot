@@ -13,15 +13,15 @@ import {
 import { AWWWW_COMMAND, AWWWW_EXEC } from './commands/awwww.js';
 import { INVITE_COMMAND, INVITE_EXEC } from './commands/invite.js';
 import { PING_COMMAND, PING_EXEC } from './commands/ping.js';
-
 import { SERVER_COMMAND, SERVER_EXEC } from './commands/server.js';
 import { USER_COMMAND, USER_EXEC } from './commands/user.js';
 import { YOTO_PLAYLIST_COMMAND, YOTO_PLAYLIST_EXEC } from './commands/yoto-playlist.js';
-import { YOTO_STORE_COMMAND, YOTO_STORE_EXEC } from './commands.js';
-import { EXTRACT_AUDIO_COMMAND, EXTRACT_AUDIO_EXEC } from './commands.js';
-import { EXTRACT_ICONS_COMMAND, EXTRACT_ICONS_EXEC } from './commands.js';
-import { ARCHIVE_LOOKUP_COMMAND, ARCHIVE_LOOKUP_EXEC } from './commands.js';
-import { MYO_SEARCH_COMMAND, MYO_SUBMIT_COMMAND, MYO_SEARCH_EXEC, MYO_SUBMIT_EXEC } from './commands.js'; 
+import { YOTO_STORE_COMMAND, YOTO_STORE_EXEC } from './commands/yoto-store.js';
+import { EXTRACT_AUDIO_COMMAND, EXTRACT_AUDIO_EXEC } from './commands/extract-audio.js';
+import { EXTRACT_ICONS_COMMAND, EXTRACT_ICONS_EXEC } from './commands/extract-icons.js';
+import { ARCHIVE_LOOKUP_COMMAND, ARCHIVE_LOOKUP_EXEC } from './commands/archive-lookup.js';
+import { MYO_SEARCH_COMMAND, MYO_SEARCH_EXEC } from './commands/myo-search.js';
+import { MYO_SUBMIT_COMMAND, MYO_SUBMIT_EXEC } from './commands/myo-submit.js'; 
 
 
 // Import other local requirements
