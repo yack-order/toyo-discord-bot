@@ -10,7 +10,7 @@ import {  EXTRACT_ICONS_COMMAND } from './commands.js';
 import {  ARCHIVE_LOOKUP_COMMAND } from './commands.js';
 import {  MYO_SEARCH_COMMAND } from './commands.js';
 import {  MYO_SUBMIT_COMMAND } from './commands.js';
-import { PING_COMMAND } from './ping.js';
+import { PING_COMMAND } from './commands/ping.js';
 
 import dotenv from 'dotenv';
 import process from 'node:process';
