@@ -154,23 +154,6 @@ async function sendSplitFollowUp(env, token, markdown, isFirst=true) {
 
 
 
-/*******************************************
- * /awwww 
- *******************************************/
-export const AWWWW_COMMAND = {
-  name: 'awwww',
-  description: 'Drop some cuteness on this channel.',
-};
-import { getCuteUrl } from './reddit.js';
-export async function AWWWW_EXEC(request, env, interaction) {  
-    const cuteUrl = await getCuteUrl();
-    return new JsonResponse({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: {
-        content: cuteUrl,
-        },
-    });
-};
 
 
 /*******************************************

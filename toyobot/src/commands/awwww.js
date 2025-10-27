@@ -1,10 +1,15 @@
+import { JsonResponse } from '../jsonresponse.js';
+import { InteractionResponseType } from 'discord-interactions';
+
+const redditUrl = 'https://www.reddit.com/r/aww/hot.json';
+
 /**
  * Reach out to the reddit API, and get the first page of results from
  * r/aww. Filter out posts without readily available images or videos,
  * and return a random result.
  * @returns The url of an image or video which is cute.
  */
-export async function getCuteUrl() {
+async function getCuteUrl() {
   const response = await fetch(redditUrl, {
     headers: {
       'User-Agent': 'justinbeckwith:awwbot:v1.0.0 (by /u/justinblat)',
@@ -15,7 +20,9 @@ export async function getCuteUrl() {
     try {
       const error = await response.text();
       if (error) {
-        errorText = `${errorText} \n\n ${error}`;
+        errorText = `${errorText} 
+
+ ${error}`;
       }
     } catch {
       // ignore
@@ -40,4 +47,18 @@ export async function getCuteUrl() {
   return randomPost;
 }
 
-export const redditUrl = 'https://www.reddit.com/r/aww/hot.json';
+
+export const AWWWW_COMMAND = {
+  name: 'awwww',
+  description: 'Drop some cute pictures from r/awwww.',
+};
+
+export async function AWWWW_EXEC(request, env, interaction) {
+  const awwwUrl = await getCuteUrl();
+  return new JsonResponse({
+    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+    data: {
+      content: awwwUrl,
+    },
+  });
+}

@@ -1,17 +1,18 @@
-import {  AWWWW_COMMAND } from './commands.js';
-import {  INVITE_COMMAND } from './commands.js';
-import {  SERVER_COMMAND } from './commands.js';
-import {  USER_COMMAND } from './commands.js';
-import {  DEV_COMMAND } from './commands.js';
-import {  YOTO_STORE_COMMAND } from './commands.js';
-import {  EXTRACT_AUDIO_COMMAND } from './commands.js';
-import {  YOTO_PLAYLIST_COMMAND } from './commands.js';
-import {  EXTRACT_ICONS_COMMAND } from './commands.js';
-import {  ARCHIVE_LOOKUP_COMMAND } from './commands.js';
-import {  MYO_SEARCH_COMMAND } from './commands.js';
-import {  MYO_SUBMIT_COMMAND } from './commands.js';
+import { AWWWW_COMMAND } from './commands/awwww.js';
 import { PING_COMMAND } from './commands/ping.js';
-
+import {
+  INVITE_COMMAND,
+  SERVER_COMMAND,
+  USER_COMMAND,
+  DEV_COMMAND,
+  YOTO_STORE_COMMAND,
+  EXTRACT_AUDIO_COMMAND,
+  YOTO_PLAYLIST_COMMAND,
+  EXTRACT_ICONS_COMMAND,
+  ARCHIVE_LOOKUP_COMMAND,
+  MYO_SEARCH_COMMAND,
+  MYO_SUBMIT_COMMAND
+ } from './commands.js';
 import dotenv from 'dotenv';
 import process from 'node:process';
 
@@ -41,11 +42,24 @@ if (!applicationId) {
  */
 const url = `https://discord.com/api/applications/${applicationId}/commands`;
 
-const reg_command = JSON.stringify([PING_COMMAND, DEV_COMMAND, INVITE_COMMAND,
-  YOTO_STORE_COMMAND, YOTO_PLAYLIST_COMMAND,
-  EXTRACT_AUDIO_COMMAND, EXTRACT_ICONS_COMMAND,
-  ARCHIVE_LOOKUP_COMMAND, MYO_SEARCH_COMMAND, MYO_SUBMIT_COMMAND
-]);
+const allCommands = [
+  AWWWW_COMMAND,
+  PING_COMMAND,
+  INVITE_COMMAND,
+  SERVER_COMMAND,
+  USER_COMMAND,
+  DEV_COMMAND,
+  YOTO_STORE_COMMAND,
+  YOTO_PLAYLIST_COMMAND,
+  EXTRACT_AUDIO_COMMAND,
+  EXTRACT_ICONS_COMMAND,
+  ARCHIVE_LOOKUP_COMMAND,
+  MYO_SEARCH_COMMAND,
+  MYO_SUBMIT_COMMAND
+];
+
+const reg_command = JSON.stringify(allCommands)
+
 const del_command = JSON.stringify([]);
 
 async function send(command, note){
@@ -66,11 +80,14 @@ async function send(command, note){
     console.log(JSON.stringify(data, null, 2));
   } else {
     console.error(`Error with ${note} commands`);
-    let errorText = `Error ${note} commands \n ${response.url}: ${response.status} ${response.statusText}`;
+    let errorText = `Error ${note} commands 
+ ${response.url}: ${response.status} ${response.statusText}`;
     try {
       const error = await response.text();
       if (error) {
-        errorText = `${errorText} \n\n ${error}`;
+        errorText = `${errorText} 
+
+ ${error}`;
       }
     } catch (err) {
       console.error('Error reading body from request:', err);
