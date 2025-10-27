@@ -10,6 +10,7 @@ import { EXTRACT_ICONS_COMMAND, EXTRACT_ICONS_EXEC } from './commands/extract-ic
 import { ARCHIVE_LOOKUP_COMMAND, ARCHIVE_LOOKUP_EXEC } from './commands/archive-lookup.js';
 import { MYO_SEARCH_COMMAND, MYO_SEARCH_EXEC } from './commands/myo-search.js';
 import { MYO_SUBMIT_COMMAND, MYO_SUBMIT_EXEC } from './commands/myo-submit.js';
+import { HELP_COMMAND, HELP_EXEC } from './commands/help.js';
 import { DEV_COMMAND, DEV_EXEC } from './commands/yoto-dev.js';
 
 const commandMap = {
@@ -25,6 +26,7 @@ const commandMap = {
   [ARCHIVE_LOOKUP_COMMAND.name]: { definition: ARCHIVE_LOOKUP_COMMAND, handler: ARCHIVE_LOOKUP_EXEC },
   [MYO_SEARCH_COMMAND.name]: { definition: MYO_SEARCH_COMMAND, handler: MYO_SEARCH_EXEC },
   [MYO_SUBMIT_COMMAND.name]: { definition: MYO_SUBMIT_COMMAND, handler: MYO_SUBMIT_EXEC },
+  [HELP_COMMAND.name]: { definition: HELP_COMMAND, handler: HELP_EXEC },
   [DEV_COMMAND.name]: { definition: DEV_COMMAND, handler: DEV_EXEC },
 };
 
