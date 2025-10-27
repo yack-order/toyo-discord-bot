@@ -10,8 +10,8 @@ import {
 } from 'discord-interactions';
 
 // Import the command and execution function individually
-import { AWWWW_COMMAND, AWWWW_EXEC } from './commands.js';
-import { INVITE_COMMAND, INVITE_EXEC } from './commands.js';
+import { AWWWW_COMMAND, AWWWW_EXEC } from './commands/awwww.js';
+import { INVITE_COMMAND, INVITE_EXEC } from './commands/invite.js';
 import { DEV_COMMAND, DEV_EXEC } from './commands.js';
 import { SERVER_COMMAND, SERVER_EXEC } from './commands.js';
 import { USER_COMMAND, USER_EXEC } from './commands.js';

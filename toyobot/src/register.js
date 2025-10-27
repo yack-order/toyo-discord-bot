@@ -1,7 +1,7 @@
 import { AWWWW_COMMAND } from './commands/awwww.js';
 import { PING_COMMAND } from './commands/ping.js';
+import { INVITE_COMMAND } from './commands/invite.js';
 import {
-  INVITE_COMMAND,
   SERVER_COMMAND,
   USER_COMMAND,
   DEV_COMMAND,
