@@ -2,7 +2,15 @@ import { AWWWW_COMMAND } from './commands/awwww.js';
 import { PING_COMMAND } from './commands/ping.js';
 import { INVITE_COMMAND } from './commands/invite.js';
 import { SERVER_COMMAND } from './commands/server.js';
-import { USER_COMMAND, DEV_COMMAND, YOTO_STORE_COMMAND, EXTRACT_AUDIO_COMMAND, YOTO_PLAYLIST_COMMAND, EXTRACT_ICONS_COMMAND, ARCHIVE_LOOKUP_COMMAND, MYO_SEARCH_COMMAND, MYO_SUBMIT_COMMAND } from './commands.js';
+import { USER_COMMAND } from './commands/user.js';
+import { DEV_COMMAND } from './commands.js';
+import { YOTO_STORE_COMMAND } from './commands.js';
+import { EXTRACT_AUDIO_COMMAND } from './commands.js';
+import { YOTO_PLAYLIST_COMMAND } from './commands.js';
+import { EXTRACT_ICONS_COMMAND } from './commands.js';
+import { ARCHIVE_LOOKUP_COMMAND } from './commands.js';
+import { MYO_SEARCH_COMMAND } from './commands.js';
+import { MYO_SUBMIT_COMMAND } from './commands.js';
 import dotenv from 'dotenv';
 import process from 'node:process';
 

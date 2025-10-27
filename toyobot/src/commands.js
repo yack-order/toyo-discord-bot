@@ -154,26 +154,6 @@ async function sendSplitFollowUp(env, token, markdown, isFirst=true) {
 
 
 /*******************************************
- * /user 
- *******************************************/
-export const USER_COMMAND = {
-  name: 'user',
-  description: 'Replies with user info.',
-};
-export function USER_EXEC(request, env, interaction) {  
-  return new JsonResponse({
-      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-      data: {
-          content: 
-          `username: ${interaction.member.user.username}
-id: ${interaction.member.user.id}
-nickname: ${interaction.member.nick}`,
-      }
-  })
-};
-
-
-/*******************************************
  * /yoto-store <url>
  * /yoto-store url: https://us.yotoplay.com/products/paw-patrol-pup-pack
  *******************************************/

@@ -14,9 +14,8 @@ import { AWWWW_COMMAND, AWWWW_EXEC } from './commands/awwww.js';
 import { INVITE_COMMAND, INVITE_EXEC } from './commands/invite.js';
 import { PING_COMMAND, PING_EXEC } from './commands/ping.js';
 
-import { DEV_COMMAND, DEV_EXEC } from './commands.js';
 import { SERVER_COMMAND, SERVER_EXEC } from './commands/server.js';
-import { USER_COMMAND, USER_EXEC } from './commands.js';
+import { USER_COMMAND, USER_EXEC } from './commands/user.js';
 import { YOTO_PLAYLIST_COMMAND, YOTO_PLAYLIST_EXEC } from './commands.js';
 import { YOTO_STORE_COMMAND, YOTO_STORE_EXEC } from './commands.js';
 import { EXTRACT_AUDIO_COMMAND, EXTRACT_AUDIO_EXEC } from './commands.js';
@@ -278,9 +277,6 @@ router.post('/', async (request, env, ctx) => {
             'Content-Type': 'application/json;charset=UTF-8'
           }
         });
-      }
-      case DEV_COMMAND.name.toLowerCase():{
-        return DEV_EXEC(request, env, interaction);
       }
       case SERVER_COMMAND.name.toLowerCase():{
         return SERVER_EXEC(request, env, interaction);
