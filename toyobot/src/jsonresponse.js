@@ -1,11 +1,24 @@
 export class JsonResponse extends Response {
-    constructor(body, init) {
+    constructor(body, init = {}) {
+      console.log('JsonResponse constructor - raw body:', JSON.stringify(body));
       const jsonBody = JSON.stringify(body);
-      init = init || {
+      
+      // Create explicit headers
+      const responseInit = {
+        status: 200,
         headers: {
-          'content-type': 'application/json;charset=UTF-8',
-        },
+          'Content-Type': 'application/json;charset=UTF-8'
+        }
       };
-      super(jsonBody, init);
+      
+      console.log('JsonResponse constructor - using init:', JSON.stringify(responseInit));
+      super(jsonBody, responseInit);
+      
+      // Log actual headers after construction
+      const finalHeaders = {};
+      for (const [key, value] of this.headers) {
+        finalHeaders[key] = value;
+      }
+      console.log('Final response headers:', JSON.stringify(finalHeaders));
     }
   }

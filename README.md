@@ -65,6 +65,48 @@ Pins to relevant documentation that i've been using.
 * [Registering Commands](https://discord.com/developers/docs/tutorials/upgrading-to-application-commands#registering-commands)
 
 
+# Set up a local dev environment
+on MacOS
+1. install [VS Code](https://code.visualstudio.com/download)
+2. install [Github Desktop](https://desktop.github.com/download/)
+3. clone this repo from github desktop
+4. install [homebrew](https://brew.sh/)
+5. upsate terminal rc file or start a new terminal
+```zsh
+source ~/.zshrc
+```
+6. install npm using homebrew
+```zsh
+# from anywhere
+brew install node
+source ~/.zshrc
+node -v
+npm -v
+```
+7. install project dependencies
+```zsh
+# from the project root folder
+cd toyobot
+npm install
+```
+8. create `.dev.vars` file for dotenv
+```zsh
+# from the toyobot folder
+cp example.dev.vars .dev.vars
+# open in your editor, or edit with nano:
+nano .dev.vars
+```
+9. now we are ready to run the register script
+```zsh
+# from toyobot folder
+npm run register
+```
+10. use this to dry-run test the setup
+```zsh
+node -e "require('dotenv').config({ path: '.dev.vars' }); console.log(process.env.DISCORD_TOKEN ? 'token set' : 'token missing', 'APP_ID=', process.env.DISCORD_APPLICATION_ID)"
+```
+
+
 # Building New Commands
 1. `src/commands.js` - Add a new command using the template. It needs a name for the **const** to use, the **name** value is what a user enters in the chat `/yoto-store-info parameters go here`, **description** is what pops up when the user is typing. Options can be used. 
     ```javascript

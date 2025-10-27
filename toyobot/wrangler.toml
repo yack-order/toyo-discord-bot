@@ -40,3 +40,11 @@ enabled = true
 # [[services]]
 # binding = "MY_SERVICE"
 # service = "my-service"
+
+###
+# D1 Database Bindings
+# Make sure this matches the database name in your Cloudflare account.
+###
+[[d1_databases]]
+binding = "MYO_ARCHIVE"
+database_id = "07352da1-6f27-4b0f-87ad-1cbd0bf5b062"

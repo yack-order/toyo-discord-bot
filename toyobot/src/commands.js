@@ -201,12 +201,23 @@ export const PING_COMMAND = {
   description: 'Replies with Pong!',
 };
 export function PING_EXEC(request, env, interaction) {  
-  return new JsonResponse({
+  console.log('Creating PING response');
+  const responseBody = {
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
       data: {
           content: "Pong!",
       }
-  })
+  };
+  console.log('Response body:', JSON.stringify(responseBody));
+  const response = new JsonResponse(responseBody, {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    }
+  });
+  console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+  console.log('Response status:', response.status);
+  return response;
 };
 
 
@@ -502,4 +513,85 @@ export async function EXTRACT_ICONS_EXEC(request, env, interaction) {
           content: markdown,
       }
   });
+};
+
+
+//***********************************
+// ********************************
+// ********************************
+// these functions will leverage the cloudflare database */
+/*******************************************
+ * /myo-submit <url>
+ * /myo-submit url: https://yoto.io/hMkni?84brH2BNuhyl=e79sopPfwKnBL
+ * TODO -- this is incomplete
+ *******************************************/
+import { AddUrlToD1 as MYOSubmit } from './toyoarchive.js';
+export const MYO_SUBMIT_COMMAND = {
+  name: 'myo-submit',
+  description: 'Submit a new MYO playlist.\n this is incomplete.',
+  options: [
+    {
+      name: 'url',
+      description: 'URL of the playlist page. e.g.: https://yoto.io/hMkni?84brH2BNuhyl=e79sopPfwKnBL',
+      required: true,
+      type: 3,
+    }
+  ],
+};
+export async function MYO_SUBMIT_EXEC(request, env, interaction) {  
+  const url = interaction.data.options[0].value;
+  const data = await MYOSubmit(url, env.MYO_ARCHIVE);
+  const markdown = formatDataAsMarkdown(data);
+  return new JsonResponse({
+      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+      flags: InteractionResponseFlags.EPHEMERAL, //only show the message to the user who invoked the command
+      data: {
+          content: markdown,
+      }
+  });
+};
+
+/*******************************************
+ * /myo-search query
+ * /myo-search query: "roger zelazny"
+ * TODO -- this is incomplete
+ *******************************************/
+import { SearchArchiveDetailed, formatSearchResultsMarkdown } from './toyoarchive.js';
+export const MYO_SEARCH_COMMAND = {
+  name: 'myo-search',
+  description: 'Search the archive of MYO playlistss. Only use one type at a time.\n this is incomplete.',
+  options: [
+    {
+      name: 'query',
+    description: 'Enter a playlist URL, cardId, author, title, userId, or creatorEmail (e.g. "roger zelazny")',
+      required: true,
+      type: 3,
+    }
+  ],
+};
+export async function MYO_SEARCH_EXEC(request, env, interaction) {  
+  console.log('Creating MYO_SEARCH response');
+  const query = interaction.data.options[0].value;
+  console.log('Search query:', query);
+  
+  try {
+    const data = await SearchArchiveDetailed(query, env.MYO_ARCHIVE);
+    const markdown = formatSearchResultsMarkdown(data);
+    console.log('Search result markdown:', markdown);
+    
+    return new JsonResponse({
+      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+      data: {
+        content: markdown
+      }
+    });
+  } catch (error) {
+    console.error('MYO_SEARCH error:', error);
+    return new JsonResponse({
+      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+      data: {
+        content: 'An error occurred while searching.'
+      }
+    });
+  }
 };
