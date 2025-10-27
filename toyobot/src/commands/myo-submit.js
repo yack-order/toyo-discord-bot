@@ -21,7 +21,7 @@ export const MYO_SUBMIT_COMMAND = {
   ],
 };
 
-export async function MYO_SUBMIT_EXEC(request, env, interaction) {  
+export async function MYO_SUBMIT_EXEC(request, env, interaction, ctx) {
   const url = interaction.data.options[0].value;
   const data = await MYOSubmit(url, env.MYO_ARCHIVE);
   const markdown = formatDataAsMarkdown(data);
