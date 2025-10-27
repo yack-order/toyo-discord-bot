@@ -6,11 +6,11 @@ import { AutoRouter } from 'itty-router';
 import {
   InteractionResponseType,
   InteractionType,
+  verifyKey,
 } from 'discord-interactions';
 
 import { commands } from './commands.js';
 import { JsonResponse } from './jsonresponse.js';
-import { verifyDiscordRequest } from './discord-utils.js';
 
 const router = AutoRouter();
 
@@ -65,6 +65,28 @@ router.get('/', (request, env) => {
   return new Response(`👋 ${env.DISCORD_APPLICATION_ID}`);
 });
 
+router.get('/help', (request, env) => {
+  const help = {
+    description: 'Toyobot HTTP route reference (GET) and usage notes. These GET routes emulate the Discord interaction POSTs for quick testing.',
+    routes: [
+      { route: '/', method: 'GET', description: 'Basic hello page with application id.' },
+      { route: '/help', method: 'GET', description: 'This help page (JSON).' },
+      { 
+        route: '/dev/:command', 
+        description: 'Dynamically execute any registered command for testing. Options are passed as query parameters. E.g., /dev/yoto-store?url=https://...' 
+      },
+      { route: 'POST /', method: 'POST', params: 'Discord interaction JSON', example: 'POST / with Discord interaction payload', description: 'Primary production entrypoint for slash commands from Discord. This route provides a real ctx and must be used for correct background execution.' },
+    ],
+    notes: [
+      'GET routes are for development and testing — they emulate the slash command inputs by constructing a fake interaction object from query parameters.',
+      'For background work that must survive the immediate response, use POST interactions where Cloudflare provides a real `ctx` and `ctx.waitUntil`.',
+      'The /myo-submit GET route provides a fake ctx.waitUntil that schedules the background job and logs completion; it does not replicate Cloudflare lifecycle guarantees.',
+      'If you need the server to return the constructed interaction for debugging, add ?debug=1 to the request (consider requesting this change if desired).'
+    ]
+  };
+  return new JsonResponse(help);
+});
+
 /**
  * Main route for all requests sent from Discord.  All incoming messages will
  * include a JSON payload described here:
@@ -89,7 +111,7 @@ router.post('/', async (request, env, ctx) => {
   } catch (e) {
     console.log('Error logging incoming request:', e && e.stack ? e.stack : e);
   }
-  const { isValid, interaction } = await verifyDiscordRequest(
+  const { isValid, interaction } = await server.verifyDiscordRequest(
     request,
     env,
   );
@@ -154,7 +176,68 @@ router.post('/', async (request, env, ctx) => {
 });
 router.all('*', () => new Response('Not Found.', { status: 404 }));
 
+async function verifyDiscordRequest(request, env) {
+  console.log('Starting request verification...');
+  const signature = request.headers.get('x-signature-ed25519');
+  const timestamp = request.headers.get('x-signature-timestamp');
+  
+  console.log('Request headers:', {
+    'x-signature-ed25519': signature ? 'present' : 'missing',
+    'x-signature-timestamp': timestamp ? 'present' : 'missing',
+    'content-type': request.headers.get('content-type'),
+    'user-agent': request.headers.get('user-agent')
+  });
+  
+  const body = await request.text();
+  console.log('Request body:', body.substring(0, 1000)); // Log first 1000 chars of body
+  
+  if (!signature || !timestamp || !env.DISCORD_PUBLIC_KEY) {
+    console.error('Missing verification components:', {
+      signature: !!signature,
+      timestamp: !!timestamp,
+      publicKey: !!env.DISCORD_PUBLIC_KEY,
+      bodyLength: body.length
+    });
+    return { isValid: false };
+  }
+
+  try {
+    console.log('Attempting to verify key with:', {
+      bodyLength: body.length,
+      signatureLength: signature?.length,
+      timestampLength: timestamp?.length,
+      publicKeyLength: env.DISCORD_PUBLIC_KEY?.length
+    });
+    
+    const isValidRequest = await verifyKey(body, signature, timestamp, env.DISCORD_PUBLIC_KEY);
+    console.log('Key verification result:', isValidRequest);
+    
+    if (!isValidRequest) {
+      console.error('Invalid request signature');
+      return { isValid: false };
+    }
+
+    const parsedBody = JSON.parse(body);
+    console.log('Successfully parsed interaction:', {
+      type: parsedBody.type,
+      commandName: parsedBody.data?.name,
+      options: parsedBody.data?.options
+    });
+    
+    return { 
+      interaction: parsedBody, 
+      isValid: true,
+      rawBody: body // Keep the raw body in case we need it
+    };
+  } catch (err) {
+    console.error('Verification error:', err);
+    console.error('Error stack:', err.stack);
+    return { isValid: false };
+  }
+}
+
 const server = {
+  verifyDiscordRequest,
   fetch: router.fetch,
 };
 
