@@ -1,15 +1,5 @@
-import { AWWWW_COMMAND } from './commands/awwww.js';
-import { PING_COMMAND } from './commands/ping.js';
-import { INVITE_COMMAND } from './commands/invite.js';
-import { SERVER_COMMAND } from './commands/server.js';
-import { USER_COMMAND } from './commands/user.js';
-import { YOTO_STORE_COMMAND } from './commands/yoto-store.js';
-import { EXTRACT_AUDIO_COMMAND } from './commands/extract-audio.js';
-import { YOTO_PLAYLIST_COMMAND } from './commands/yoto-playlist.js';
-import { EXTRACT_ICONS_COMMAND } from './commands/extract-icons.js';
-import { ARCHIVE_LOOKUP_COMMAND } from './commands/archive-lookup.js';
-import { MYO_SEARCH_COMMAND } from './commands/myo-search.js';
-import { MYO_SUBMIT_COMMAND } from './commands/myo-submit.js';
+import { allCommandDefs } from './commands.js';
+import { DEV_COMMAND } from './commands/yoto-dev.js';
 import dotenv from 'dotenv';
 import process from 'node:process';
 
@@ -39,21 +29,7 @@ if (!applicationId) {
  */
 const url = `https://discord.com/api/applications/${applicationId}/commands`;
 
-const allCommands = [
-  AWWWW_COMMAND,
-  PING_COMMAND,
-  INVITE_COMMAND,
-  SERVER_COMMAND,
-  USER_COMMAND,
-  DEV_COMMAND,
-  YOTO_STORE_COMMAND,
-  YOTO_PLAYLIST_COMMAND,
-  EXTRACT_AUDIO_COMMAND,
-  EXTRACT_ICONS_COMMAND,
-  ARCHIVE_LOOKUP_COMMAND,
-  MYO_SEARCH_COMMAND,
-  MYO_SUBMIT_COMMAND
-];
+const allCommands = [...allCommandDefs];
 
 const reg_command = JSON.stringify(allCommands)
 

@@ -9,140 +9,53 @@ import {
   verifyKey,
 } from 'discord-interactions';
 
-// Import the command and execution function individually
-import { AWWWW_COMMAND, AWWWW_EXEC } from './commands/awwww.js';
-import { INVITE_COMMAND, INVITE_EXEC } from './commands/invite.js';
-import { PING_COMMAND, PING_EXEC } from './commands/ping.js';
-import { SERVER_COMMAND, SERVER_EXEC } from './commands/server.js';
-import { USER_COMMAND, USER_EXEC } from './commands/user.js';
-import { YOTO_PLAYLIST_COMMAND, YOTO_PLAYLIST_EXEC } from './commands/yoto-playlist.js';
-import { YOTO_STORE_COMMAND, YOTO_STORE_EXEC } from './commands/yoto-store.js';
-import { EXTRACT_AUDIO_COMMAND, EXTRACT_AUDIO_EXEC } from './commands/extract-audio.js';
-import { EXTRACT_ICONS_COMMAND, EXTRACT_ICONS_EXEC } from './commands/extract-icons.js';
-import { ARCHIVE_LOOKUP_COMMAND, ARCHIVE_LOOKUP_EXEC } from './commands/archive-lookup.js';
-import { MYO_SEARCH_COMMAND, MYO_SEARCH_EXEC } from './commands/myo-search.js';
-import { MYO_SUBMIT_COMMAND, MYO_SUBMIT_EXEC } from './commands/myo-submit.js'; 
-
-
-// Import other local requirements
+import { commands } from './commands.js';
 import { JsonResponse } from './jsonresponse.js';
 
 const router = AutoRouter();
 
-// Respond on HTTP/GET with the basic functions for debugging purposes
-// TODO: Use GET parameters the same way as POST parameters so the functions can operate the same way over GET and POST
-router.get('/awwww', (request, env) => {
-  const interaction = {
-    id: 'webget',
-    token: 'webget',
-    type: InteractionType.APPLICATION_COMMAND,
-    member: { user: { username: 'webget', id: 'webget' }, nick: null },
-    data: { name: 'awwww', options: [] },
-  };
-  return AWWWW_EXEC(request, env, interaction);
-});
+/**
+ * A dynamic GET route for testing any command.
+ * e.g. /dev/ping
+ *      /dev/yoto-store?url=...
+ */
+router.get('/dev/:command', (request, env) => {
+  const commandName = request.params.command;
+  const command = commands[commandName];
 
-router.get('/user', (request, env) => {
+  if (!command) {
+    return new JsonResponse({ error: 'Command not found' }, { status: 404 });
+  }
+
+  // Construct a mock interaction from query parameters
+  const options = command.definition.options?.map(opt => ({
+    name: opt.name,
+    value: request.query[opt.name],
+  })) || [];
+
   const interaction = {
     id: 'webget',
     token: 'webget',
     type: InteractionType.APPLICATION_COMMAND,
     member: { user: { username: 'webget', id: 'webget' }, nick: 'webget' },
-    data: { name: 'user', options: [] },
-  };
-  return USER_EXEC(request, env, interaction);
-});
-
-router.get('/server', (request, env) => {
-  const interaction = {
-    id: 'webget',
-    token: 'webget',
-    type: InteractionType.APPLICATION_COMMAND,
     guild: { name: 'webget-server', memberCount: 0, createdAt: new Date().toISOString(), verificationLevel: 'none' },
-    data: { name: 'server', options: [] },
+    data: { name: commandName, options },
   };
-  return SERVER_EXEC(request, env, interaction);
-});
 
-router.get('/ping', (request, env) => {
-  const interaction = { id: 'webget', token: 'webget', type: InteractionType.APPLICATION_COMMAND, data: { name: 'ping', options: [] } };
-  return PING_EXEC(request, env, interaction);
-});
-
-router.get('/invite', (request, env) => {
-  const interaction = { id: 'webget', token: 'webget', type: InteractionType.APPLICATION_COMMAND, data: { name: 'invite', options: [] } };
-  return INVITE_EXEC(request, env, interaction);
-});
-
-router.get('/yoto-store', (request, env) => {
-  const url = request.query.url || request.query.u || '';
-  const interaction = {
-    id: 'webget',
-    token: 'webget',
-    type: InteractionType.APPLICATION_COMMAND,
-    data: { name: 'yoto-store', options: [{ name: 'url', value: url }] },
-    channel_id: request.query.channel_id || null,
-    member: { user: { id: request.query.user_id || 'webget', username: request.query.user || 'webget' } },
-  };
-  return YOTO_STORE_EXEC(request, env, interaction);
-});
-
-router.get('/yoto-playlist', (request, env) => {
-  const url = request.query.url || request.query.u || '';
-  const show = request.query.show === 'true' || request.query.show === '1' ? true : false;
-  const interaction = {
-    id: 'webget',
-    token: 'webget',
-    type: InteractionType.APPLICATION_COMMAND,
-    data: { name: 'yoto-playlist', options: [{ name: 'url', value: url }, { name: 'show', value: show }] },
-    channel_id: request.query.channel_id || null,
-    member: { user: { id: request.query.user_id || 'webget', username: request.query.user || 'webget' } },
-  };
-  return YOTO_PLAYLIST_EXEC(request, env, interaction);
-});
-
-router.get('/extract-audio', (request, env) => {
-  const url = request.query.url || request.query.u || '';
-  const interaction = { id: 'webget', token: 'webget', type: InteractionType.APPLICATION_COMMAND, data: { name: 'extract-audio', options: [{ name: 'url', value: url }] } };
-  return EXTRACT_AUDIO_EXEC(request, env, interaction);
-});
-
-router.get('/extract-icons', (request, env) => {
-  const url = request.query.url || request.query.u || '';
-  const interaction = { id: 'webget', token: 'webget', type: InteractionType.APPLICATION_COMMAND, data: { name: 'extract-icons', options: [{ name: 'url', value: url }] } };
-  return EXTRACT_ICONS_EXEC(request, env, interaction);
-});
-
-router.get('/archive-lookup', (request, env) => {
-  const id = request.query.id || request.query.q || '';
-  const interaction = { id: 'webget', token: 'webget', type: InteractionType.APPLICATION_COMMAND, data: { name: 'archive-lookup', options: [{ name: 'id', value: id }] } };
-  return ARCHIVE_LOOKUP_EXEC(request, env, interaction);
-});
-
-router.get('/myo-search', (request, env) => {
-  const q = request.query.q || request.query.query || '';
-  const interaction = { id: 'webget', token: 'webget', type: InteractionType.APPLICATION_COMMAND, data: { name: 'myo-search', options: [{ name: 'query', value: q }] } };
-    return MYO_SEARCH_EXEC(request, env, interaction);
-});
-
-router.get('/myo-submit', (request, env) => {
-  const url = request.query.url || request.query.u || '';
-  const interaction = { id: 'webget', token: 'webget', type: InteractionType.APPLICATION_COMMAND, data: { name: 'myo-submit', options: [{ name: 'url', value: url }] } };
   // Simulate a Cloudflare `ctx` for GET/dev mode so background tasks can be scheduled.
   const fakeCtx = {
     waitUntil(promise) {
-      // Don't await here; schedule and log completion/errors.
       Promise.resolve(promise)
         .then(() => {
-          console.log('myo-submit background task completed (dev fakeCtx)');
+          console.log(`Background task for ${commandName} completed (dev fakeCtx)`);
         })
         .catch((err) => {
-          console.error('myo-submit background task error (dev fakeCtx):', err && err.stack ? err.stack : err);
+          console.error(`Background task for ${commandName} error (dev fakeCtx):`, err && err.stack ? err.stack : err);
         });
     },
   };
 
-    return MYO_SUBMIT_EXEC(request, env, interaction, fakeCtx);
+  return command.handler(request, env, interaction, fakeCtx);
 });
 
 /**
@@ -156,20 +69,12 @@ router.get('/help', (request, env) => {
   const help = {
     description: 'Toyobot HTTP route reference (GET) and usage notes. These GET routes emulate the Discord interaction POSTs for quick testing.',
     routes: [
-      { route: '/', method: 'GET', params: null, example: '/', description: 'Basic hello page with application id.' },
-      { route: '/help', method: 'GET', params: null, example: '/help', description: 'This help page (JSON).' },
-      { route: '/awwww', method: 'GET', params: null, example: '/awwww', description: 'Return a cute image URL. Emulates /awwww slash command.' },
-      { route: '/user', method: 'GET', params: null, example: '/user', description: 'Return user info. Emulates /user slash command.' },
-      { route: '/server', method: 'GET', params: null, example: '/server', description: 'Return server info. Emulates /server slash command.' },
-      { route: '/ping', method: 'GET', params: null, example: '/ping', description: 'Return Pong. Emulates /ping slash command.' },
-      { route: '/invite', method: 'GET', params: null, example: '/invite', description: 'Return bot invite link. Emulates /invite slash command.' },
-      { route: '/yoto-store', method: 'GET', params: ['url'], example: '/yoto-store?url=https://us.yotoplay.com/products/frog', description: 'Fetch metadata from a Yoto store page. Param: url' },
-      { route: '/yoto-playlist', method: 'GET', params: ['url','show'], example: '/yoto-playlist?url=https://yoto.io/hMkni?84brH2BNuhyl=e79sopPfwKnBL&show=true', description: 'Fetch playlist metadata. Param: url. Optional show=true to make response public.' },
-      { route: '/extract-audio', method: 'GET', params: ['url'], example: '/extract-audio?url=<playlist-url>', description: 'Return track audio URLs from a playlist page.' },
-      { route: '/extract-icons', method: 'GET', params: ['url'], example: '/extract-icons?url=<playlist-url>', description: 'Return icon image URLs from a playlist page.' },
-      { route: '/archive-lookup', method: 'GET', params: ['id'], example: '/archive-lookup?id=12345', description: 'Lookup an archived card by id.' },
-      { route: '/myo-search', method: 'GET', params: ['q|query'], example: '/myo-search?q=roger+zelazny', description: 'Search the MYO archive by url, cardId, title, author, userId or creatorEmail.' },
-      { route: '/myo-submit', method: 'GET', params: ['url'], example: '/myo-submit?url=https://yoto.io/hMkni?84brH2BNuhyl=e79sopPfwKnBL', description: 'Submit a MYO playlist URL. GET dev route simulates a ctx so background work will be scheduled; in production use the slash command POST.' },
+      { route: '/', method: 'GET', description: 'Basic hello page with application id.' },
+      { route: '/help', method: 'GET', description: 'This help page (JSON).' },
+      { 
+        route: '/dev/:command', 
+        description: 'Dynamically execute any registered command for testing. Options are passed as query parameters. E.g., /dev/yoto-store?url=https://...' 
+      },
       { route: 'POST /', method: 'POST', params: 'Discord interaction JSON', example: 'POST / with Discord interaction payload', description: 'Primary production entrypoint for slash commands from Discord. This route provides a real ctx and must be used for correct background execution.' },
     ],
     notes: [
@@ -240,77 +145,15 @@ router.post('/', async (request, env, ctx) => {
       options: interaction.data.options
     });
     
-    // Log all available command names for comparison
-    console.log('Available commands:', {
-      ping: PING_COMMAND.name.toLowerCase(),
-      myo_search: MYO_SEARCH_COMMAND.name.toLowerCase(),
-      yoto_playlist: YOTO_PLAYLIST_COMMAND.name.toLowerCase()
-    });
-    
-    // Most user commands will come as `APPLICATION_COMMAND`.
-    switch (interaction.data.name.toLowerCase()) {
-      case AWWWW_COMMAND.name.toLowerCase(): {
-        console.log('Executing AWWWW command');
-        return AWWWW_EXEC(request, env, interaction);
-      }
-      case INVITE_COMMAND.name.toLowerCase(): {
-        console.log('Executing INVITE command');
-        return INVITE_EXEC(request, env, interaction);
-      }
-      case PING_COMMAND.name.toLowerCase():{
-        console.log('Executing PING command');
-        const responseBody = {
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: 'Pong!'
-          }
-        };
-        
-        // Log response details after a slight delay to not interfere with sending
-        setTimeout(() => {
-          console.log('Sent response:', JSON.stringify(responseBody));
-        }, 100);
-        
-        return new Response(JSON.stringify(responseBody), {
-          status: 200,
-          headers: {
-            'Content-Type': 'application/json;charset=UTF-8'
-          }
-        });
-      }
-      case SERVER_COMMAND.name.toLowerCase():{
-        return SERVER_EXEC(request, env, interaction);
-      }
-      case USER_COMMAND.name.toLowerCase():{
-        return USER_EXEC(request, env, interaction);
-      }
-      case YOTO_STORE_COMMAND.name.toLowerCase():{
-        return YOTO_STORE_EXEC(request, env, interaction, ctx);
-      }
-      case YOTO_PLAYLIST_COMMAND.name.toLowerCase():{
-        return YOTO_PLAYLIST_EXEC(request, env, interaction);
-      }
-      case EXTRACT_AUDIO_COMMAND.name.toLowerCase():{
-        return EXTRACT_AUDIO_EXEC(request, env, interaction);
-      }
-      case EXTRACT_ICONS_COMMAND.name.toLowerCase():{
-        return EXTRACT_ICONS_EXEC(request, env, interaction);
-      }
-      case ARCHIVE_LOOKUP_COMMAND.name.toLowerCase():{
-        return ARCHIVE_LOOKUP_EXEC(request, env, interaction);
-      }
-      case MYO_SEARCH_COMMAND.name.toLowerCase():{
-        return MYO_SEARCH_EXEC(request, env, interaction);
-      }
-      case MYO_SUBMIT_COMMAND.name.toLowerCase():{
-        return MYO_SUBMIT_EXEC(request, env, interaction, ctx);
-      }
-      default:
-        console.error('Unknown Command\n\n');
-        console.log('Interaction:', interaction);
-        console.log('Interaction Data:', interaction.data);
-        console.log('Request', request);
-        return new JsonResponse({ error: 'Unknown Type' }, { status: 400 });
+    const commandName = interaction.data.name.toLowerCase();
+    const command = commands[commandName];
+
+    if (command) {
+      console.log(`Executing command: ${commandName}`);
+      return command.handler(request, env, interaction, ctx);
+    } else {
+      console.error(`Unknown Command: ${commandName}`);
+      return new JsonResponse({ error: 'Unknown command' }, { status: 400 });
     }
   }
 
