@@ -1,11 +1,17 @@
-import { AWWWW_COMMAND, INVITE_COMMAND, SERVER_COMMAND, USER_COMMAND,  //non-registered commands
-  PING_COMMAND, DEV_COMMAND, //generic
-  YOTO_STORE_COMMAND,  //public store commands
-  EXTRACT_AUDIO_COMMAND, YOTO_PLAYLIST_COMMAND, //private playlist commands
-  EXTRACT_ICONS_COMMAND, //public playlist commands
-  ARCHIVE_LOOKUP_COMMAND, //archive lookup command
-  MYO_SEARCH_COMMAND, MYO_SUBMIT_COMMAND //myo archive commands
- } from './commands.js';
+import {  AWWWW_COMMAND } from './commands.js';
+import {  INVITE_COMMAND } from './commands.js';
+import {  SERVER_COMMAND } from './commands.js';
+import {  USER_COMMAND } from './commands.js';
+import {  DEV_COMMAND } from './commands.js';
+import {  YOTO_STORE_COMMAND } from './commands.js';
+import {  EXTRACT_AUDIO_COMMAND } from './commands.js';
+import {  YOTO_PLAYLIST_COMMAND } from './commands.js';
+import {  EXTRACT_ICONS_COMMAND } from './commands.js';
+import {  ARCHIVE_LOOKUP_COMMAND } from './commands.js';
+import {  MYO_SEARCH_COMMAND } from './commands.js';
+import {  MYO_SUBMIT_COMMAND } from './commands.js';
+import { PING_COMMAND } from './ping.js';
+
 import dotenv from 'dotenv';
 import process from 'node:process';
 
