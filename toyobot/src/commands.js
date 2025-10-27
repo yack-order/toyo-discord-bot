@@ -153,30 +153,6 @@ async function sendSplitFollowUp(env, token, markdown, isFirst=true) {
 //==================================
 
 
-
-
-
-/*******************************************
- * /server 
- *******************************************/
-export const SERVER_COMMAND = {
-  name: 'server',
-  description: 'Replies with server info.',
-};
-export function SERVER_EXEC(request, env, interaction) {  
-  return new JsonResponse({
-      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-      data: {
-          content: `This command is not useful yet.
-Server name: ${interaction.guild.name}
-Total members: ${interaction.guild.memberCount}
-Created at: ${interaction.guild.createdAt}
-Verification level: ${interaction.guild.verificationLevel}`,
-      }
-  })
-};
-
-
 /*******************************************
  * /user 
  *******************************************/
