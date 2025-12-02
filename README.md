@@ -1,3 +1,4 @@
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/F1F315ODO5)
 # toyo-discord-bot
 Bot for the TOYO Discord with customized commands.
 
